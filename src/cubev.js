@@ -106,16 +106,23 @@ window.onload = function init()
 }
 
 var idle_rotation_vel = 1.0;
-
+const gravity_speed_init = 0.005;
+var gravity_speed = gravity_speed_init;
+var direction = 1;
+var move_scale =0.1
+var rotate_scale = 4;
 function render()
 {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 	
-	console.log(objects.length);
 	for(var i=0;i<objects.length;i++){
 		
+		if(getBottom(objects[i].getVertices()) > -1)
+			move(objects[i],gravity_speed,directions.DOWN);
 		//objects[i].changeTheta(0,objects[i].getTheta()[0] + idle_rotation_vel);
+		if(i==1)
+			console.log("bottom:" ,getBottom(objects[i].getVertices()));
 		gl.uniform3fv(objects[i].getThetaLoc(), objects[i].getTheta()); //theta, html'de uniform vec3 olarak tanımlandı, uniform3fv ile değer aktarması yapıyoruz
 		buffer(objects[i]);
 		gl.drawElements(gl.TRIANGLES, objects[i].getIndices().length, gl.UNSIGNED_BYTE, 0);
@@ -125,9 +132,7 @@ function render()
     requestAnimFrame( render );
 }
 
-var direction = 1;
-var move_scale =0.1
-var rotate_scale = 4;
+
 window.onkeydown = function(event) {
 	let key = String.fromCharCode(event.keyCode).toLowerCase();
 	switch(key){
@@ -159,28 +164,48 @@ window.onkeydown = function(event) {
 		case 'd':
 			move(mainObject,move_scale,directions.RIGHT);
 			break;
-			
+		case ' ':
+			gravity_speed = 0.01;
+			break;
 			
 	}
 }
 
+window.onkeyup = function(){
+	let key = String.fromCharCode(event.keyCode).toLowerCase();
+	
+	switch(key){
+		case ' ':
+			gravity_speed = gravity_speed_init;
+			break;
+		
+	}
+	
+}
 function rotate(object,dir_enum){
 	let index = 1 - dir_enum[0];
 	let direction = (2*index-1)*dir_enum[1]; // 0 ise negatif, 1 ise pozitifi 
 	object.changeTheta(index,object.getTheta()[index]+direction*rotate_scale); 
 }
 
-function move(object,move_scale,dir_enum,isAll=false){
+function move(object,move_scale,dir_enum){
 	
 	let index = dir_enum[0];
 	let direction = dir_enum[1];
 	let pay = 180 - Math.abs(object.getTheta()[1-index]);
 	let direction_rotation_fix = pay/Math.abs(pay) ; //180 derece olayı var
-	console.log(direction_rotation_fix);
-	console.log(object.getTheta());
 	let vertices = object.getVertices();
 	for(let i=0;i<vertices.length;i++)
 		vertices[i][index]+=direction*move_scale*direction_rotation_fix;
 	object.setVertices(vertices);
+}
+
+//Vertice'lerden y ekseninde en aşağıda olan pixelin koordinatını döndürür
+function getBottom(vertices){
+	let min = 1; // y'si en küçük olan en aşağıda, x'i en büyük olan en sağda
+	for(var i=0;i<vertices.length;i++)
+			if(vertices[i][1] < min)
+				min = vertices[i][1];
+	return min;
 }
 
