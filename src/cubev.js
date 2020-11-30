@@ -7,6 +7,23 @@ var sizeScale = 1;
 var objects = []
 var mainObject = null;
 var mainObjectIndex = 1;
+var cameraTheta = [1,1,1];
+var camera_theta_loc;
+var idle_rotation_vel = 1.0;
+const gravity_speed_init = 0.005;
+var gravity_speed = gravity_speed_init;
+var direction = 1;
+var move_scale =0.1
+var rotate_scale = 4;
+const directions = {
+	"RIGHT"	: [ 0,1],
+	"LEFT"	: [0,-1],
+	"UP"	: [ 1,1],
+	"DOWN" 	: [1,-1],
+//	"FRONT" : [2,1]
+
+}
+var program;
 
 
 class Object{
@@ -42,15 +59,7 @@ class Object{
 
 
 
-const directions = {
-	"RIGHT"	: [ 0,1],
-	"LEFT"	: [0,-1],
-	"UP"	: [ 1,1],
-	"DOWN" 	: [1,-1],
-//	"FRONT" : [2,1]
 
-}
-var program;
 function buffer(obj){
 	
     var iBuffer = gl.createBuffer();
@@ -99,18 +108,13 @@ window.onload = function init()
 		objects.push(new Object(initObjects[i].vertices,initObjects[i].colors,initObjects[i].indices));	
 		buffer(objects[i]);
 	}
-
+	camera_theta_loc = gl.getUniformLocation(program, "camera");
 	mainObject = objects[mainObjectIndex];
 		
 	render();
 }
 
-var idle_rotation_vel = 1.0;
-const gravity_speed_init = 0.005;
-var gravity_speed = gravity_speed_init;
-var direction = 1;
-var move_scale =0.1
-var rotate_scale = 4;
+
 function render()
 {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -124,6 +128,7 @@ function render()
 		if(i==1)
 			console.log("bottom:" ,getBottom(objects[i].getVertices()));
 		gl.uniform3fv(objects[i].getThetaLoc(), objects[i].getTheta()); //theta, html'de uniform vec3 olarak tanımlandı, uniform3fv ile değer aktarması yapıyoruz
+		
 		buffer(objects[i]);
 		gl.drawElements(gl.TRIANGLES, objects[i].getIndices().length, gl.UNSIGNED_BYTE, 0);
 		
@@ -166,6 +171,10 @@ window.onkeydown = function(event) {
 			break;
 		case ' ':
 			gravity_speed = 0.01;
+			break;
+		case 'c':
+			cameraTheta[1] +=1;
+			gl.uniform3fv(camera_theta_loc, cameraTheta);
 			break;
 			
 	}
