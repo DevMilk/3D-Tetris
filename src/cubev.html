@@ -40,7 +40,7 @@ void main()
 					0.0,  0.0, 0.0, 1.0 );
 					
 					
-					
+	//Kamera için yaptım
 	mat4 cx = mat4( 1.0,  0.0,  0.0, 0.0,
 					0.0,  c_c.x,  c_s.x, 0.0,
 					0.0, -c_s.x,  c_c.x, 0.0,
@@ -58,7 +58,7 @@ void main()
 					0.0,  0.0, 0.0, 1.0 );
 
     fColor = vColor;
-    gl_Position = rz * ry * rx * vPosition*cy*cx*cz;
+    gl_Position = rz * ry * rx * vPosition * cy * cx *cz;
     gl_Position.z = -gl_Position.z; // Dönme yönünü ters çevirir
 }
 </script>

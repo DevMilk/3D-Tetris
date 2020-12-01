@@ -6,8 +6,9 @@ var gl;
 var sizeScale = 1;
 var objects = []
 var mainObject = null;
-var mainObjectIndex = 1;
-var cameraTheta = [1,1,1];
+var mainObjectIndex = 0;
+var GroundObject;
+var cameraTheta = [0,0,0];
 var camera_theta_loc;
 var idle_rotation_vel = 1.0;
 const gravity_speed_init = 0.005;
@@ -15,12 +16,15 @@ var gravity_speed = gravity_speed_init;
 var direction = 1;
 var move_scale =0.1
 var rotate_scale = 4;
+var GROUND_Y = -0.89;
+var cameraSpeed = 4;
 const directions = {
 	"RIGHT"	: [ 0,1],
 	"LEFT"	: [0,-1],
 	"UP"	: [ 1,1],
 	"DOWN" 	: [1,-1],
-//	"FRONT" : [2,1]
+	"FRONT" : [2,1],
+	"BEHIND" : [2,-1]
 
 }
 var program;
@@ -95,7 +99,7 @@ window.onload = function init()
     if ( !gl ) { alert( "WebGL isn't available" ); }
 
     gl.viewport( 0, 0, canvas.width, canvas.height );
-    gl.clearColor( 0.0, 0.0, 0.0, 1.0 );
+    gl.clearColor( 0.2, 0.2, 0.2, 1.0 );
 
     gl.enable(gl.DEPTH_TEST);;
 	console.log("Sahnedeki obje sayısı: ",initObjects.length);
@@ -108,6 +112,7 @@ window.onload = function init()
 		objects.push(new Object(initObjects[i].vertices,initObjects[i].colors,initObjects[i].indices));	
 		buffer(objects[i]);
 	}
+	GroundObject = objects[1];
 	camera_theta_loc = gl.getUniformLocation(program, "camera");
 	mainObject = objects[mainObjectIndex];
 		
@@ -122,7 +127,7 @@ function render()
 	
 	for(var i=0;i<objects.length;i++){
 		
-		if(getBottom(objects[i].getVertices()) > -1)
+		if(getBottom(objects[i].getVertices()) > GROUND_Y )
 			move(objects[i],gravity_speed,directions.DOWN);
 		//objects[i].changeTheta(0,objects[i].getTheta()[0] + idle_rotation_vel);
 		if(i==1)
@@ -144,27 +149,31 @@ window.onkeydown = function(event) {
 		
 		//ROTATİON
 		case '&': //yukarı
-			rotate(mainObject,directions.UP);
+			//rotate(mainObject,directions.UP);
+			rotateCamera(directions.UP);
 			break;
 		case '%':  //sol
-			rotate(mainObject,directions.LEFT);
+			//rotate(mainObject,directions.LEFT);
+			rotateCamera(directions.LEFT);
 			break;
 		case '(': //aşağı
-			rotate(mainObject,directions.DOWN);
+			//rotate(mainObject,directions.DOWN);
+			rotateCamera(directions.DOWN);
 			break;
 		case '\'': //sağ
-			rotate(mainObject,directions.RIGHT);
+			//rotate(mainObject,directions.RIGHT);
+			rotateCamera(directions.RIGHT);
 			break;
 			
 		//TODO MOVEMENT, Rotationdan sonraki directionlara bak
 		case 'w':
-			move(mainObject,move_scale,directions.UP);
+			move(mainObject,move_scale,directions.FRONT);
 			break;
 		case 'a':
 			move(mainObject,move_scale,directions.LEFT);
 			break;
 		case 's':
-			move(mainObject,move_scale,directions.DOWN);
+			move(mainObject,move_scale,directions.BEHIND);
 			break;
 		case 'd':
 			move(mainObject,move_scale,directions.RIGHT);
@@ -173,7 +182,8 @@ window.onkeydown = function(event) {
 			gravity_speed = 0.01;
 			break;
 		case 'c':
-			cameraTheta[1] +=1;
+			cameraTheta[0] =(cameraTheta[0]+1)%360;
+
 			gl.uniform3fv(camera_theta_loc, cameraTheta);
 			break;
 			
@@ -196,13 +206,19 @@ function rotate(object,dir_enum){
 	let direction = (2*index-1)*dir_enum[1]; // 0 ise negatif, 1 ise pozitifi 
 	object.changeTheta(index,object.getTheta()[index]+direction*rotate_scale); 
 }
+function rotateCamera(dir_enum){
+	let index = 1 - dir_enum[0];
+	let direction = (2*index-1)*dir_enum[1]; // 0 ise negatif, 1 ise pozitifi 
+	cameraTheta[index]+=direction*cameraSpeed;
+	gl.uniform3fv(camera_theta_loc, cameraTheta);
+}
 
 function move(object,move_scale,dir_enum){
 	
 	let index = dir_enum[0];
 	let direction = dir_enum[1];
 	let pay = 180 - Math.abs(object.getTheta()[1-index]);
-	let direction_rotation_fix = pay/Math.abs(pay) ; //180 derece olayı var
+	let direction_rotation_fix = 1;//pay/Math.abs(pay) ; //180 derece olayı var
 	let vertices = object.getVertices();
 	for(let i=0;i<vertices.length;i++)
 		vertices[i][index]+=direction*move_scale*direction_rotation_fix;
