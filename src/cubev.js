@@ -6,7 +6,7 @@ var gl;
 var sizeScale = 1;
 var objects = []
 var mainObject = null;
-var mainObjectIndex = 0;
+var mainObjectIndex = initObjects.length-1; //son tanımlanan obje ana objemiz
 var GroundObject;
 var cameraTheta = [0,0,0];
 var camera_theta_loc;
@@ -14,9 +14,10 @@ var idle_rotation_vel = 1.0;
 const gravity_speed_init = 0.005;
 var gravity_speed = gravity_speed_init;
 var direction = 1;
-var move_scale =0.1
+var move_scale =edge_length
 var rotate_scale = 4;
-var GROUND_Y = -0.89;
+var epsilon = 0.01
+var GROUND_Y = -0.9 + epsilon;
 var cameraSpeed = 4;
 const directions = {
 	"RIGHT"	: [ 0,1],
@@ -62,8 +63,26 @@ class Object{
 }
 
 
-
-
+function controlCollusion(){
+	//Sadece kontrolünde olduğumuz asset için kontrol edeceğiz
+	//Eğer asset'in en alt pixelin, x, y ve z'si başka bir objeye eşitse durdur
+	for(var i=0;i<objects.length-1;i++){
+		for(var j=0;j<objects[i].vertices.length;j++)
+			for(var k=0;k<objects[objects.length-1].vertices.length;k++)
+				if(objects[i].vertices[j].equals(objects[objects.length-1].vertices[k]))
+					return true;
+	}
+	return false;
+	
+}
+function newAsset(){
+	//Yeni Asset Üret (yeni assetlerin ilk bloğunun koordinatları aynı)
+	objects.push(newAsset);
+	
+	//Yeni Asset'in kontrolünü al
+	mainObjectIndex = objects.length-1;
+	
+}
 function buffer(obj){
 	
     var iBuffer = gl.createBuffer();
