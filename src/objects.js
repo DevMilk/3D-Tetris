@@ -88,11 +88,11 @@ initObjects = [
   
   }, //BLOK
 ]
-for(var i=0;i<6;i++)
+for(var i=0;i<8;i++)
 	for(var j=0;j<3;j++)
 		initObjects[1].vertices[i][j] *= edge_length;
 	
-	
+	/*
 function getLowerMostPixels(object){
 	//Her x ve z değerinin en küçük y değerini alacağız
 	let min = 1;
@@ -134,3 +134,4 @@ var indices = [ //Burada sıra farketmiyor. Verilen her 3 vertex bir yüz oluyor
 	0, 2, 3
 ];*/
 //numVertices = indices.length; //Eğer drawElements ile yapmaya çalışıyorsan numVertices'i indis uzunluğuna eşitle.
+

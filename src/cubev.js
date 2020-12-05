@@ -17,7 +17,7 @@ var direction = 1;
 var move_scale =edge_length
 var rotate_scale = 4;
 var epsilon = 0.01
-var GROUND_Y = -0.9 + epsilon;
+var GROUND_Y = -0.9+epsilon;
 var cameraSpeed = 4;
 const directions = {
 	"RIGHT"	: [ 0,1],
@@ -63,18 +63,26 @@ class Object{
 }
 
 
+function arrayEquals(a, b) {
+  return Array.isArray(a) &&
+    Array.isArray(b) &&
+    a.length === b.length &&
+    a.every((val, index) => val === b[index]);
+}
+
+/*
 function controlCollusion(){
 	//Sadece kontrolünde olduğumuz asset için kontrol edeceğiz
 	//Eğer asset'in en alt pixelin, x, y ve z'si başka bir objeye eşitse durdur
 	for(var i=0;i<objects.length-1;i++){
 		for(var j=0;j<objects[i].vertices.length;j++)
-			for(var k=0;k<objects[objects.length-1].vertices.length;k++)
-				if(objects[i].vertices[j].equals(objects[objects.length-1].vertices[k]))
+			for(var k=0;k<objects[mainObjectIndex].vertices.length;k++)
+				if(arrayEquals(objects[i].vertices[j],objects[mainObjectIndex].vertices[k]))
 					return true;
 	}
 	return false;
 	
-}
+}*/
 function newAsset(){
 	//Yeni Asset Üret (yeni assetlerin ilk bloğunun koordinatları aynı)
 	objects.push(newAsset);
@@ -146,7 +154,7 @@ function render()
 	
 	for(var i=0;i<objects.length;i++){
 		
-		if(getBottom(objects[i].getVertices()) > GROUND_Y )
+		if(getBottom(objects[i].getVertices()) > GROUND_Y) //
 			move(objects[i],gravity_speed,directions.DOWN);
 		//objects[i].changeTheta(0,objects[i].getTheta()[0] + idle_rotation_vel);
 		if(i==1)
