@@ -60,7 +60,7 @@ function createRect(x,y,z,a,b,c,colors){
   }
   for(var i=0;i<rect.vertices.length;i++)
 	  rect.colors.push(colors[i%colors.length]);
-  
+  rect.indices = quad(rect.indices);
   return rect;
 	
 }
@@ -71,10 +71,8 @@ function createCube(x,y,z,a,colors){
 
 function createAndMap(x,y,z,a,colorArr,cubes){
 	let newCube = createCube(x,y,z,a,colorArr);
-	
 	for(var i=0;i<newCube.indices.length;i++)
-		for(var j=0;j<newCube.indices[i].length;j++)
-			newCube.indices[i][j]+=8*cubes.length;
+			newCube.indices[i]+=8*cubes.length;
 	return newCube;
 }
 
@@ -87,15 +85,16 @@ function combineCubes(blueprint,a, colorArr,initialX = 0, initialY=0, initialZ=0
 	var cubes = new Array();
 	for(var i=0;i<blueprint.length;i++){
 		if(Array.isArray(blueprint[i])){
-			for(var j=0;j<blueprint[i].length;j++)
+			for(var j=0;j<blueprint[i].length;j++){
 					if(Array.isArray(blueprint[i][j])){
 						for(var k=0;k<blueprint[i][j].length;k++){
 							if(blueprint[i][j][k]==1)
 								cubes.push(createAndMap(initialX+a*k,initialY-a*j,initialZ-a*i,a,colorArr,cubes)); //3 BOYUTLU
-					}
+						}
 					}
 					else if(blueprint[i][j]==1)
 						cubes.push(createAndMap(initialX+a*j,initialY-a*i,initialZ,a,colorArr,cubes));//2 BOYUTLU
+			}
 		}
 		else if(blueprint[i]==1)
 			cubes.push(createAndMap(initialX+a*i,initialY,initialZ,a,colorArr,cubes));//1 BOYUTLU
@@ -115,6 +114,7 @@ function combineCubes(blueprint,a, colorArr,initialX = 0, initialY=0, initialZ=0
 		
 		combinedObject.indices.push(...(cubes[i].indices));
 	}
+	console.log(combinedObject)
 	return combinedObject;
 	
 }
@@ -124,6 +124,7 @@ function parseAsset(asset){
 	let cubes = []
 	
 	let assetVertices = asset.getVertices();
+	console.log("d",assetVertices.length);
 	for(var j=0;j<assetVertices.length/8;j++){
 		let obj = {};
 		let begin = j*8;
@@ -131,6 +132,7 @@ function parseAsset(asset){
 		cubes.push(createCube(...assetVertices[begin],edge_length,asset.getColors().slice(begin,begin+8)));
 	
 	}
+	console.log(cubes);
 	return cubes;
 	
 }

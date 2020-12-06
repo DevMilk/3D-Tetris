@@ -16,7 +16,7 @@ var gravity_speed = gravity_speed_init;
 var direction = 1;
 var move_scale =edge_length
 var rotate_scale = 4;
-var epsilon = gravity_speed_init; //en optimum görünüm için
+var epsilon = 0.0001; //en optimum görünüm için
 var GROUND_Y = -0.9+epsilon;
 var cameraSpeed = 4;
 var ended = false;
@@ -33,7 +33,6 @@ var program;
 
 class Object{
 	constructor(obj){
-		obj = quad(obj);
 		this.vertices = [];
 		this.colors = [];
 		this.theta = [1,1,1];
@@ -73,30 +72,27 @@ function arrayEquals(a, b) {
 }
 
 function lineClsn(line1,line2,distance=epsilon){
-	return line1[0] <= line2[1]+distance && line1[1]+distance >= line2[0];
+	return line1[0] < line2[1]+distance && line1[1]+distance > line2[0];
 }
 
-function boxClsn(mainObj = objects[objects.length-1]){
+function boxClsn(mainObj){
 	//ŞU AN SADECE KÜP İÇİN
 	//Asset'ler küplerden oluşacak
 	const [X,Y,Z] = getMinMax(mainObj);
-	for(var i=0;i<objects.length-1;i++){
-		
-		if(objects[i].getType()=="asset"){
-			let cubes = parseAsset(objects[i]);
-			for(var j=0;j<cubes.length;j++)
-				if(boxClsn(cubes[j]))
-					return true;
-		}
-		
-		else if(objects[i].getType()=="rect"){
-			let [x,y,z] = getMinMax(objects[i]);
-			
-			if(lineClsn(X,x,0) && lineClsn(Y,y) && lineClsn(Z,z,0)){
+	if(mainObj.type=="asset"){
+		let cubes = parseAsset(mainObj);
+		for(var j=0;j<cubes.length;j++){
+			if(boxClsn(cubes[j]))
 				return true;
-			}
 		}
+	}
 		
+	for(var i=0;i<objects.length-1;i++){
+		let [x,y,z] = getMinMax(objects[i]);
+		
+		if(lineClsn(X,x) && lineClsn(Y,y) && lineClsn(Z,z)){
+			return true;
+		}
 	}
 	return false;
 	
@@ -174,10 +170,10 @@ function render(){
 
 	
 	
-	if(ended == false && boxClsn()==false) //
+	if(ended == false && boxClsn(objects[objects.length-1])==false) //
 		move(objects[objects.length-1],gravity_speed,directions.DOWN);
 	
-	else if(ended ==false && boxClsn()){
+	else if(ended ==false && boxClsn(objects[objects.length-1])){
 		let newCubesToAdd = parseAsset(objects.pop());
 		for(var i=0;i<newCubesToAdd.length;i++){
 
@@ -267,7 +263,7 @@ function rotateCamera(dir_enum){
 }
 
 function move(object,move_scale,dir_enum){
-	if(boxClsn()) //Sadece a
+	if(boxClsn(object)) //Sadece a
 		return
 	let index = dir_enum[0];
 	let direction = dir_enum[1];
