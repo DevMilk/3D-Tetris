@@ -1,4 +1,6 @@
 var edge_length = 0.1;
+
+let bitMap = [1, 1]
 initObjects = [
 	/*DÜZEY*/ createRect(-0.6,-0.7,-0.6,
 				1.2,0.05,1.2,
@@ -11,8 +13,9 @@ initObjects = [
 					[0.0, 0.0, 0.0, 1.0],
 					[0.2, 0.2, 0.2, 1.0]	
 			   ]
-			 )
-  
+			 ),
+
+			combineCubes([[1,1]],edge_length,[[0.8, 0.8, 0.8, 1],[0, 0.8, 0.8, 1],[0.8, 0, 0.8, 1]],0,0.5,0)		
 ]
 	
 function quad(objOriginal){
@@ -26,7 +29,8 @@ function quad(objOriginal){
 }
 
 function getMinMax(rectangle){
-	let vertex = rectangle.getVertices();
+	let vertex = Array.isArray(rectangle) ? rectangle: rectangle.getVertices();
+	
 	return [
 			[vertex[0][0],vertex[6][0]], //minX, maxX
 			[vertex[6][1],vertex[0][1]], //minY, maxY
@@ -43,8 +47,6 @@ function getBottom(vertices){
 	return min;
 }
 
-for(var i=0;i<initObjects.length;i++)
-	quad(initObjects[i]);
 
 
 	/*
