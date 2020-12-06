@@ -1,97 +1,52 @@
 var edge_length = 0.1;
 initObjects = [
-  /*{
-  "vertices": [
-        [-0.1, -0.1, -0.1],
-        [0.1, -0.1, -0.1],
-        [0.0, -0.1,  0.1],
-        [0.0,  0.1,  0.1]
-    ],
-  "colors": [
-        [0.0, 0.0, 0.0, 1.0] ,  
-        [1.0, 0.0, 0.0, 1.0] ,  
-        [1.0, 1.0, 0.0, 1.0] ,  
-        [0.0, 1.0, 1.0, 1.0]    
-    ],
-  "indices": [ 
-    1, 0, 3,
-    0, 2, 1,
-	1, 2, 3,
-  	0, 2, 3
-  ]
+	/*DÜZEY*/ createRect(-0.6,-0.7,-0.6,
+				1.2,0.05,1.2,
+				[[0.0, 0.0, 0.4, 1.0], [1.0, 0.0, 1.0, 1.0]]),
+				
+    /*KÜP*/ createCube(
+			   0,0,0,
+			   edge_length,
+			   [
+					[0.0, 0.0, 0.0, 1.0],
+					[0.2, 0.2, 0.2, 1.0]	
+			   ]
+			 )
   
-  }, //OBJE*/
- 
-  
-   {
-  "vertices": [
-        [-0.6, -0.9, -0.6],
-        [-0.6, -0.9, 0.6],
-        [0.6, -0.9, 0.6],
-        [0.6, -0.9, -0.6],
-		[-0.6, -0.95, -0.6],
-        [-0.6, -0.95, 0.6],
-        [0.6, -0.95, 0.6],
-        [0.6, -0.95, -0.6]
-    ],
-  "colors": [
-        [0.0, 0.0, 0.4, 1.0] ,  
-        [0.0, 0.0, 0.4, 1.0] ,  
-        [0.0, 0.0, 0.4, 1.0] ,  
-        [0.0, 0.0, 0.4, 1.0] ,
-		[1.0, 0.0, 1.0, 1.0] ,  
-        [1.0, 0.0, 1.0, 1.0] ,  
-        [1.0, 0.0, 1.0, 1.0] ,  
-        [1.0, 0.0, 1.0, 1.0]   		
-    ],
-  "indices": [ 
-    0,1,2, 0,2,3, //üst
-	4,5,6, 4,6,7, //alt
-	0,1,5, 0,5,4, //sol
-	3,7,6, 3,6,2, //sağ
-	0,3,7, 0,7,4, //arka
-	1,5,6, 1,6,2  //ön
-	
-  ]
-  
-  }, //DÜZEY
-  
-  {
-  "vertices": [
-        [0,0,0],
-        [0,0,1], 
-        [1,0,1],
-        [1,0,0],
-		[0,1,0],
-		[0,1,1],
-		[1,1,1],
-		[1,1,0]
-    ],
-  "colors": [
-        [0.0, 0.0, 0.0, 1.0] ,  
-        [1.0, 0.0, 0.0, 1.0] ,  
-        [1.0, 1.0, 0.0, 1.0] ,  
-        [0.0, 1.0, 1.0, 1.0] ,
-		[0.0, 0.0, 0.0, 1.0] ,  
-        [1.0, 0.0, 0.0, 1.0] ,  
-        [1.0, 1.0, 0.0, 1.0] ,  
-        [0.0, 1.0, 1.0, 1.0] 		
-    ],
-  "indices": [ 
-    0,1,2,0,2,3,
-	0,4,5,0,5,1,
-	4,5,6,4,6,7,
-	3,2,6,3,6,7,
-	1,5,2,1,6,2,
-	0,4,7,0,7,3
-  ]
-  
-  }, //BLOK
 ]
-for(var i=0;i<8;i++)
-	for(var j=0;j<3;j++)
-		initObjects[1].vertices[i][j] *= edge_length;
 	
+function quad(objOriginal){
+	let obj = objOriginal;
+	for(var j=0;j<obj.indices.length;j++){
+		let index = obj.indices[j];
+		obj.indices[j] = [index[0],index[1],index[2],index[0],index[2],index[3]]
+	}
+	obj.indices = [].concat.apply([], obj.indices);
+	return obj;
+}
+
+function getMinMax(rectangle){
+	let vertex = rectangle.getVertices();
+	return [
+			[vertex[0][0],vertex[6][0]], //minX, maxX
+			[vertex[6][1],vertex[0][1]], //minY, maxY
+			[vertex[0][2],vertex[6][2]]  //minZ, maxZ
+		   ]
+	
+}
+
+function getBottom(vertices){
+	let min = 1; // y'si en küçük olan en aşağıda, x'i en büyük olan en sağda
+	for(var i=0;i<vertices.length;i++)
+			if(vertices[i][1] < min)
+				min = vertices[i][1];
+	return min;
+}
+
+for(var i=0;i<initObjects.length;i++)
+	quad(initObjects[i]);
+
+
 	/*
 function getLowerMostPixels(object){
 	//Her x ve z değerinin en küçük y değerini alacağız
