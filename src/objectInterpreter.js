@@ -92,7 +92,7 @@ function combineCubes(blueprint,a, colorArr,initialX = 0, initialY=0, initialZ=0
 		}
 		else 
 			for(var k=1;k<=blueprint[i];k++)
-				cubes.push(createAndMap(initialX+a*j,initialY,initialZ-a*(k-1),a,colorArr,cubes))
+				cubes.push(createAndMap(initialX+a*i,initialY,initialZ-a*(k-1),a,colorArr,cubes))
 		
 	}
 	

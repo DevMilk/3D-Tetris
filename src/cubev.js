@@ -14,7 +14,7 @@ var idle_rotation_vel = 1.0;
 const gravity_speed_init = 0.001;
 var gravity_speed = gravity_speed_init;
 var direction = 1;
-var move_scale =0.03
+var move_scale =edge_length;
 var rotate_scale = 4;
 var epsilon = -0.001; //en optimum görünüm için
 var GROUND_Y = -0.9+epsilon;
@@ -80,7 +80,7 @@ function boxClsn(mainObj){
 		for(var j=0;j<cubes.length;j++){
 			if(boxClsn(cubes[j])==true){
 
-				console.log(j+" indisli küp soruna neden oldu");
+			//	console.log(j+" indisli küp soruna neden oldu");
 				return true;
 			}
 		}
@@ -90,8 +90,6 @@ function boxClsn(mainObj){
 			let [x,y,z] = getMinMax(objects[i]);
 			
 			if(lineClsn(X,x) && lineClsn(Y,y,0) && lineClsn(Z,z)){
-				console.log(X,Y,Z)
-				console.log(x,y,z)
 				return true;
 			}
 		}
@@ -102,7 +100,7 @@ function boxClsn(mainObj){
 function rotateS(object,dir_enum){
 	
 	let vertices = object.vertices;
-	
+	let temp = copy(object.vertices);
 	let isVertical = dir_enum[0]; 
 	let direction = dir_enum[1];
 	//Jointi fixlemek için
@@ -115,18 +113,17 @@ function rotateS(object,dir_enum){
 	
 
 	for(let i=1;i<vertices.length;i++){
+		
+		let difZ = vertices[i][2]-pivot[2];
 		if(isVertical){
 			
-			let difY = vertices[i][1]-pivot[1]
-			let difZ = vertices[i][2]-pivot[2];
+			let difY = vertices[i][1]-pivot[1];
 			vertices[i][1] += direction*(difZ-difY);
 			vertices[i][2] += direction*(difY-difZ);
 			
 		}
 		else{
-			let difX = vertices[i][0]-pivot[0]
-			let difZ = vertices[i][2]-pivot[2];
-			
+			let difX = vertices[i][0]-pivot[0];
 			vertices[i][0] += direction*(difZ+difX);
 			vertices[i][2] += direction*(difZ-difX);
 			
@@ -147,8 +144,10 @@ function rotateS(object,dir_enum){
 		for(let j=0;j<3;j++)
 			vertices[i][j] -= extra[j];
 	}
-	object.vertices = vertices;
-		
+	if(boxClsn(object))
+		object.vertices = temp;
+	else
+		object.vertices = vertices;
 	
 }
 function newAsset(){
@@ -233,9 +232,7 @@ function render(){
 		let newCubesToAdd = parseAsset(objects.pop());
 		for(var i=0;i<newCubesToAdd.length;i++)
 			addToScene(newCubesToAdd[i]);
-		
-		console.log(objects[2]);
-		ended = true;
+		addToScene(initObjects[2]);
 	}
 	for(var i=0;i<objects.length;i++){
 		gl.uniform3fv(objects[i].getThetaLoc(), objects[i].getTheta()); //theta, html'de uniform vec3 olarak tanımlandı, uniform3fv ile değer aktarması yapıyoruz
@@ -276,16 +273,16 @@ window.onkeydown = function(event) {
 			
 		//TODO MOVEMENT, Rotationdan sonraki directionlara bak
 		case 'w':
-			move(mainObject,move_scale,directions.FRONT);
+			move(objects[objects.length-1],move_scale,directions.FRONT);
 			break;
 		case 'a':
-			move(mainObject,move_scale,directions.LEFT);
+			move(objects[objects.length-1],move_scale,directions.LEFT);
 			break;
 		case 's':
-			move(mainObject,move_scale,directions.BEHIND);
+			move(objects[objects.length-1],move_scale,directions.BEHIND);
 			break;
 		case 'd':
-			move(mainObject,move_scale,directions.RIGHT);
+			move(objects[objects.length-1],move_scale,directions.RIGHT);
 			break;
 		case ' ':
 			gravity_speed = 0.01;
