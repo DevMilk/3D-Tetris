@@ -73,19 +73,27 @@ function boxClsn(mainObj){
 	//ŞU AN SADECE KÜP İÇİN
 	//Asset'ler küplerden oluşacak
 	const [X,Y,Z] = getMinMax(mainObj);
+	
 	if(mainObj.type=="asset"){
+		
 		let cubes = parseAsset(mainObj);
 		for(var j=0;j<cubes.length;j++){
-			if(boxClsn(cubes[j]))
+			if(boxClsn(cubes[j])==true){
+
+				console.log(j+" indisli küp soruna neden oldu");
 				return true;
+			}
 		}
 	}
-		
-	for(var i=0;i<objects.length-1;i++){
-		let [x,y,z] = getMinMax(objects[i]);
-		
-		if(lineClsn(X,x) && lineClsn(Y,y,0) && lineClsn(Z,z)){
-			return true;
+	else{
+		for(var i=0;i<objects.length-1;i++){
+			let [x,y,z] = getMinMax(objects[i]);
+			
+			if(lineClsn(X,x) && lineClsn(Y,y,0) && lineClsn(Z,z)){
+				console.log(X,Y,Z)
+				console.log(x,y,z)
+				return true;
+			}
 		}
 	}
 	return false;
@@ -201,10 +209,10 @@ window.onload = function init(){
 	program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
 	
-	console.log(initObjects[1]);
     for(var i=0;i<initObjects.length;i++)
 		addToScene(initObjects[i])
 	
+	console.log(initObjects[2]);
 	GroundObject = objects[1];
 	camera_theta_loc = gl.getUniformLocation(program, "camera");
 	mainObject = objects[mainObjectIndex];

@@ -15,19 +15,15 @@ var initObjects = [
 			 ),
 
 			combineCubes([
-							[ //En ön
-								[1,1,1], //Üst
-								, //Alt
-							],
+						 //En ön
+							[1,1,1], //Üst
+							[1]
 							
-							[ //Bir arka
-								[]
-							]
 						],
 						edge_length,[[0.8, 0.8, 0.0, 1],[0, 0.8, 0.8, 1],[0.8, 0, 0.8, 1]],-0.1,0.5,0)		
 ]
 	
-var 
+
 function quad(indicesOriginal){
 	let indices = indicesOriginal;
 	for(var j=0;j<indices.length;j++){

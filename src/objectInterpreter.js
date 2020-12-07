@@ -86,26 +86,22 @@ function combineCubes(blueprint,a, colorArr,initialX = 0, initialY=0, initialZ=0
 	for(var i=0;i<blueprint.length;i++){
 		if(Array.isArray(blueprint[i])){
 			for(var j=0;j<blueprint[i].length;j++){
-					if(Array.isArray(blueprint[i][j])){
-						for(var k=0;k<blueprint[i][j].length;k++){
-							if(blueprint[i][j][k]==1)
-								cubes.push(createAndMap(initialX+a*k,initialY-a*j,initialZ-a*i,a,colorArr,cubes)); //3 BOYUTLU
-						}
-					}
-					else if(blueprint[i][j]==1)
-						cubes.push(createAndMap(initialX+a*j,initialY-a*i,initialZ,a,colorArr,cubes));//2 BOYUTLU
+					for(var k=1;k<=blueprint[i][j];k++)
+						cubes.push(createAndMap(initialX+a*j,initialY-a*i,initialZ-a*(k-1),a,colorArr,cubes))
 			}
 		}
-		else if(blueprint[i]==1)
-			cubes.push(createAndMap(initialX+a*i,initialY,initialZ,a,colorArr,cubes));//1 BOYUTLU
+		else 
+			for(var k=1;k<=blueprint[i];k++)
+				cubes.push(createAndMap(initialX+a*j,initialY,initialZ-a*(k-1),a,colorArr,cubes))
 		
 	}
+	
+	console.log(cubes);
 	let combinedObject = copy(cubes[0]);
 	combinedObject.vertices = combinedObject.vertices;
 	combinedObject.colors = combinedObject.colors;
 	combinedObject.type="asset";
 	for(var i=1;i<cubes.length;i++){
-		console.log(cubes[i].vertices.length);
 		for(var j=0;j<cubes[i].vertices.length;j++){
 			combinedObject.vertices.push(cubes[i].vertices[j]);
 			
@@ -114,8 +110,6 @@ function combineCubes(blueprint,a, colorArr,initialX = 0, initialY=0, initialZ=0
 		
 		combinedObject.indices.push(...(cubes[i].indices));
 	}
-	combinedObject.pivot = 0;
-	combinedObject.reference = 6;
 	return combinedObject;
 	
 }
