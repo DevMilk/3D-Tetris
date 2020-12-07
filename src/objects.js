@@ -1,6 +1,5 @@
 var edge_length = 0.1;
 
-let bitMap = [1, 1]
 var initObjects = [
 	/*DÜZEY*/ createRect(-0.6,-0.7,-0.6,
 				1.2,0.05,1.2,
@@ -28,7 +27,7 @@ var initObjects = [
 						edge_length,[[0.8, 0.8, 0.0, 1],[0, 0.8, 0.8, 1],[0.8, 0, 0.8, 1]],-0.1,0.5,0)		
 ]
 	
-
+var 
 function quad(indicesOriginal){
 	let indices = indicesOriginal;
 	for(var j=0;j<indices.length;j++){
