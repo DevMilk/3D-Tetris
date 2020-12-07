@@ -1,5 +1,5 @@
 "use strict";
-
+//TODO: ÇOK YAKIN OLUNCA YA DA HAVADA COLLUSION OLUNCA DURUYOR
 var canvas;
 var gl;
 
@@ -14,9 +14,9 @@ var idle_rotation_vel = 1.0;
 const gravity_speed_init = 0.001;
 var gravity_speed = gravity_speed_init;
 var direction = 1;
-var move_scale =edge_length
+var move_scale =0.03
 var rotate_scale = 4;
-var epsilon = 0.0001; //en optimum görünüm için
+var epsilon = -0.001; //en optimum görünüm için
 var GROUND_Y = -0.9+epsilon;
 var cameraSpeed = 4;
 var ended = false;
@@ -59,17 +59,11 @@ class Object{
 	getVertices = function(){ return this.vertices; }
 	getColors = function(){ return this.colors; }
 	getIndices = function(){ return this.indices; }
-		
+	
 	
 	
 }
 
-function arrayEquals(a, b) {
-  return Array.isArray(a) &&
-    Array.isArray(b) &&
-    a.length === b.length &&
-    a.every((val, index) => val === b[index]);
-}
 
 function lineClsn(line1,line2,distance=epsilon){
 	return line1[0] < line2[1]+distance && line1[1]+distance > line2[0];
@@ -90,14 +84,65 @@ function boxClsn(mainObj){
 	for(var i=0;i<objects.length-1;i++){
 		let [x,y,z] = getMinMax(objects[i]);
 		
-		if(lineClsn(X,x) && lineClsn(Y,y) && lineClsn(Z,z)){
+		if(lineClsn(X,x) && lineClsn(Y,y,0) && lineClsn(Z,z)){
 			return true;
 		}
 	}
 	return false;
 	
 }
+function rotateS(object,dir_enum){
+	
+	let vertices = object.vertices;
+	
+	let isVertical = dir_enum[0]; 
+	let direction = dir_enum[1];
+	//Jointi fixlemek için
+	
+	let difBefore = [];
+	let pivot = vertices[0];
+	let referans = vertices[6];
+	for(var i=0;i<3;i++)
+		difBefore.push(pivot[i]-referans[i]);
+	
 
+	for(let i=1;i<vertices.length;i++){
+		if(isVertical){
+			
+			let difY = vertices[i][1]-pivot[1]
+			let difZ = vertices[i][2]-pivot[2];
+			vertices[i][1] += direction*(difZ-difY);
+			vertices[i][2] += direction*(difY-difZ);
+			
+		}
+		else{
+			let difX = vertices[i][0]-pivot[0]
+			let difZ = vertices[i][2]-pivot[2];
+			
+			vertices[i][0] += direction*(difZ+difX);
+			vertices[i][2] += direction*(difZ-difX);
+			
+		}
+		
+	}
+	let difAfter = []
+	pivot = vertices[0];
+	referans = vertices[6];
+	for(var i=0;i<3;i++)
+		difAfter.push(pivot[i]-referans[i]);
+	
+	let extra = [0,0,0];
+	for(var i=0;i<3;i++)
+		extra[i] = (difBefore[i]-difAfter[i])/2;
+	
+	for(let i=0;i<vertices.length;i++){
+		for(let j=0;j<3;j++)
+			vertices[i][j] -= extra[j];
+	}
+	object.vertices = vertices;
+		
+	
+}
 function newAsset(){
 	//Yeni Asset Üret (yeni assetlerin ilk bloğunun koordinatları aynı)
 	objects.push(newAsset);
@@ -106,7 +151,10 @@ function newAsset(){
 	mainObjectIndex = objects.length-1;
 	
 }
-
+function addToScene(jsonObject){
+	objects.push(new Object(jsonObject));	
+	buffer(objects[objects.length-1]);
+}
 function buffer(obj){
 	
     var iBuffer = gl.createBuffer();
@@ -154,14 +202,14 @@ window.onload = function init(){
     gl.useProgram( program );
 	
 	console.log(initObjects[1]);
-    for(var i=0;i<initObjects.length;i++){
-		objects.push(new Object(initObjects[i]));	
-		buffer(objects[i]);
-	}
+    for(var i=0;i<initObjects.length;i++)
+		addToScene(initObjects[i])
+	
 	GroundObject = objects[1];
 	camera_theta_loc = gl.getUniformLocation(program, "camera");
 	mainObject = objects[mainObjectIndex];
-		
+	
+	gl.uniform3fv(camera_theta_loc, cameraTheta); //init camera
 	render();
 }
 
@@ -173,13 +221,11 @@ function render(){
 	if(ended == false && boxClsn(objects[objects.length-1])==false) //
 		move(objects[objects.length-1],gravity_speed,directions.DOWN);
 	
-	else if(ended ==false && boxClsn(objects[objects.length-1])){
+	else if(ended ==false && boxClsn(objects[objects.length-1])==true){
 		let newCubesToAdd = parseAsset(objects.pop());
-		for(var i=0;i<newCubesToAdd.length;i++){
-
-			objects.push(new Object(newCubesToAdd[i]));
-			buffer(objects[objects.length-1]);
-		}
+		for(var i=0;i<newCubesToAdd.length;i++)
+			addToScene(newCubesToAdd[i]);
+		
 		console.log(objects[2]);
 		ended = true;
 	}
@@ -198,7 +244,7 @@ window.onkeydown = function(event) {
 		
 		//ROTATİON
 		case '&': //yukarı
-			//rotate(mainObject,directions.UP);
+			//objects[objects.length-1].rotate(directions.UP,1);
 			rotateCamera(directions.UP);
 			break;
 		case '%':  //sol
@@ -212,6 +258,12 @@ window.onkeydown = function(event) {
 		case '\'': //sağ
 			//rotate(mainObject,directions.RIGHT);
 			rotateCamera(directions.RIGHT);
+			break;
+		case 'q':
+			rotateS(objects[objects.length-1],directions.UP);
+			break;
+		case 'e':
+			rotateS(objects[objects.length-1],directions.LEFT);
 			break;
 			
 		//TODO MOVEMENT, Rotationdan sonraki directionlara bak
@@ -230,11 +282,6 @@ window.onkeydown = function(event) {
 		case ' ':
 			gravity_speed = 0.01;
 			break;
-		case 'c':
-			cameraTheta[0] =(cameraTheta[0]+1)%360;
-
-			gl.uniform3fv(camera_theta_loc, cameraTheta);
-			break;
 			
 	}
 }
@@ -250,15 +297,18 @@ window.onkeyup = function(){
 }
 
 function rotate(object,dir_enum){
+	if(boxClsn(object))
+		return
 	let index = 1 - dir_enum[0];
 	let direction = (2*index-1)*dir_enum[1]; // 0 ise negatif, 1 ise pozitifi 
 	object.changeTheta(index,object.getTheta()[index]+direction*rotate_scale); 
+	
 }
 
 function rotateCamera(dir_enum){
 	let index = 1 - dir_enum[0];
 	let direction = (2*index-1)*dir_enum[1]; // 0 ise negatif, 1 ise pozitifi 
-	cameraTheta[index]+=direction*cameraSpeed;
+	cameraTheta[index]=(cameraTheta[index]+direction*cameraSpeed)%360;
 	gl.uniform3fv(camera_theta_loc, cameraTheta);
 }
 

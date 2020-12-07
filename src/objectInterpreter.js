@@ -114,7 +114,8 @@ function combineCubes(blueprint,a, colorArr,initialX = 0, initialY=0, initialZ=0
 		
 		combinedObject.indices.push(...(cubes[i].indices));
 	}
-	console.log(combinedObject)
+	combinedObject.pivot = 0;
+	combinedObject.reference = 6;
 	return combinedObject;
 	
 }
@@ -122,17 +123,25 @@ function combineCubes(blueprint,a, colorArr,initialX = 0, initialY=0, initialZ=0
 function parseAsset(asset){
 	//8 color, 6 indis, 8 vertices
 	let cubes = []
-	
 	let assetVertices = asset.getVertices();
-	console.log("d",assetVertices.length);
 	for(var j=0;j<assetVertices.length/8;j++){
-		let obj = {};
+		let obj = {"vertices":[],"indices":[ 
+    [0,1,2,3], //üst 
+	[4,5,6,7], //alt
+	[0,1,5,4], //sol
+	[3,7,6,2], //sağ
+	[0,3,7,4], //arka
+	[1,5,6,2]  //ön
+	
+  ],"type":"rect","colors":[]};
+		obj.indices = quad(obj.indices);
 		let begin = j*8;
 		let edge_length = Math.abs(assetVertices[1][2]- assetVertices[0][2]);
-		cubes.push(createCube(...assetVertices[begin],edge_length,asset.getColors().slice(begin,begin+8)));
+		obj.vertices = (assetVertices.slice(begin,begin+8));
+		obj.colors= (asset.colors.slice(begin,begin+8));
+		cubes.push(obj);
 	
 	}
-	console.log(cubes);
 	return cubes;
 	
 }
