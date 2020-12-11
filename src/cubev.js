@@ -8,7 +8,7 @@ var objects = []
 var mainObject = null;
 var mainObjectIndex = initObjects.length-1; //son tanımlanan obje ana objemiz
 var GroundObject;
-var cameraTheta = [0,0,0];
+var cameraTheta = [-12,26,0];
 var camera_theta_loc;
 var idle_rotation_vel = 1.0;
 const gravity_speed_init = 0.001;
@@ -29,8 +29,11 @@ const directions = {
 	"BEHIND" : [2,-1]
 
 }
+var moveSound;
+var stackSound;
 var program;
-
+var Y_LIMIT = 0.4;
+var prevTime = 0; //For smoothing movement
 class Object{
 	constructor(obj){
 		this.vertices = [];
@@ -69,6 +72,25 @@ function lineClsn(line1,line2,distance=epsilon){
 	return line1[0] < line2[1]+distance && line1[1]+distance > line2[0];
 }
 
+function isColliding(obj1,obj2){
+	const [X,Y,Z] = getMinMax(obj1);
+	let [x,y,z] = getMinMax(obj2);
+			
+	if(lineClsn(X,x) && lineClsn(Y,y,0) && lineClsn(Z,z)){
+		return true;
+	}
+	
+}
+
+function isgameEnded(){
+	for(var j=1;j<objects.length-1;j++){
+		for(var k=0;k<objects[j].vertices.length;k++)
+			if(objects[j].vertices[k][1]>Y_LIMIT)
+				return true;
+	}
+	return false;
+	
+}
 function boxClsn(mainObj){
 	//ŞU AN SADECE KÜP İÇİN
 	//Asset'ler küplerden oluşacak
@@ -150,12 +172,66 @@ function rotateS(object,dir_enum){
 		object.vertices = vertices;
 	
 }
-function newAsset(){
-	//Yeni Asset Üret (yeni assetlerin ilk bloğunun koordinatları aynı)
-	objects.push(newAsset);
+function detectAndDestroy(){
 	
-	//Yeni Asset'in kontrolünü al
-	mainObjectIndex = objects.length-1;
+//Eğer aynı y'ye sahip w*d*4 tane vertice = w*d tane küp varsa o vertice'ler silinir 
+
+//y değerleri üzerinde iterasyon
+
+	let objectsToDelete = [];
+	for(var i=ground+(edge_length/2);i<1;i+=edge_length*2){
+		let verticesOnY = [];
+		for(var j=1;j<objects.length;j++){
+			let k = 0;
+			let duzlem = [-0.1,i,-0.3]
+			let y_nx = getMinMax(objects[j])[1];
+			while(k<objects[j].vertices.length && (y_nx[0]<=i && i<=y_nx[1]) ==false )
+				k++;
+			console.log(objects[j].vertices.length)
+			console.log("k: ",k);
+			if(k<objects[j].vertices.length)
+				verticesOnY.push(j);
+
+		}
+		
+		
+		
+		
+	console.log(verticesOnY.length,w_count*h_count)
+	if(verticesOnY.length >= w_count*h_count){
+		// Birden fazla itemi silerken shft etme olayı da olduğu için
+		// Son indexten başa doğru silmek gerek
+		for(var k =verticesOnY.length-1;k>=0;k--)
+			objects.splice(verticesOnY[k],1);
+		for(var j=1;j<objects.length;j++){
+			move(objects[j],edge_length,directions.DOWN);
+		}
+	}
+	}
+	
+}
+function randomFromArr(arr){
+	let index = Math.floor((Math.random() * (arr.length-1)));
+	return arr[index];
+}
+function createNewAsset(){
+	let blueprint = [1];
+	let depth_seeds = [0,0,1,1,2,2,3,4]; //seeds for depth
+	let hw_seeds = [1,2,2,2,3,3,4];
+	let h = randomFromArr([1]);
+	let w = randomFromArr(hw_seeds);
+	for(let i=0;i<h;i++){
+		let arr = [];
+		for(let j=0;j<w;j++){
+			arr.push(randomFromArr(depth_seeds));
+		}
+
+		blueprint.push(arr);
+		
+	}
+	let obj = combineCubes(blueprint,	edge_length,[[0.8, 0.8, 0.0, 1],[0, 0.8, 0.8, 1],[0.8, 0, 0.8, 1]],-0.1,0.5,0);		
+						
+	addToScene(obj);
 	
 }
 function addToScene(jsonObject){
@@ -192,8 +268,9 @@ function buffer(obj){
 }
 
 window.onload = function init(){
-	
-	
+	objects = [];
+	moveSound = new Audio('move.mp3');
+	stackSound = new Audio("stack.mp3");
     canvas = document.getElementById( "gl-canvas" );
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
@@ -217,23 +294,36 @@ window.onload = function init(){
 	mainObject = objects[mainObjectIndex];
 	
 	gl.uniform3fv(camera_theta_loc, cameraTheta); //init camera
+	prevTime = Date.now();
 	render();
 }
+
+//MAIN
 
 function render(){
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 	
-	
-	if(ended == false && boxClsn(objects[objects.length-1])==false) //
-		move(objects[objects.length-1],gravity_speed,directions.DOWN);
+	var deltaTime = (Date.now() - prevTime)/10; //divide by 10 for normalization
+	if(ended == false && boxClsn(objects[objects.length-1])==false){ //
+		move(objects[objects.length-1],gravity_speed*deltaTime,directions.DOWN);
+	}
 	
 	else if(ended ==false && boxClsn(objects[objects.length-1])==true){
+		stackSound.play();
 		let newCubesToAdd = parseAsset(objects.pop());
 		for(var i=0;i<newCubesToAdd.length;i++)
 			addToScene(newCubesToAdd[i]);
-		addToScene(initObjects[2]);
+		detectAndDestroy();
+		if(isgameEnded()){
+			
+			console.log("Game Over");
+			return;
+		}
+		createNewAsset();
 	}
+	
+	prevTime = Date.now();
 	for(var i=0;i<objects.length;i++){
 		gl.uniform3fv(objects[i].getThetaLoc(), objects[i].getTheta()); //theta, html'de uniform vec3 olarak tanımlandı, uniform3fv ile değer aktarması yapıyoruz
 		
@@ -243,6 +333,51 @@ function render(){
 	requestAnimFrame( render );
 }
 
+var down = false;
+var dragBegin;
+window.onmousemove = function(event){
+	if(!down) return;
+	let differences = [event.clientX-dragBegin[0],event.clientY-dragBegin[1]];
+	console.log(differences[0]);
+	console.log(objects[objects.length-1].vertices[0])
+	for(var i=0;i<objects[objects.length-1].vertices.length;i++){
+		move(objects[objects.length-1],move_scale*(differences[0]/(512*8)),directions.RIGHT);
+	}
+	
+}
+
+function multiply(a, b) {
+  var aNumRows = a.length, aNumCols = a[0].length,
+      bNumRows = b.length, bNumCols = b[0].length,
+      m = new Array(aNumRows);  // initialize array of rows
+  for (var r = 0; r < aNumRows; ++r) {
+    m[r] = new Array(bNumCols); // initialize the current row
+    for (var c = 0; c < bNumCols; ++c) {
+      m[r][c] = 0;             // initialize the current cell
+      for (var i = 0; i < aNumCols; ++i) {
+        m[r][c] += a[r][i] * b[i][c];
+      }
+    }
+  }
+  return m;
+}
+
+
+
+window.onmousedown = function(event){
+	var rect = canvas.getBoundingClientRect();
+    let ob =  {
+      x: (event.clientX - rect.left)*2/rect.width -1,
+      y: (-(event.clientY - rect.top))*2/rect.height +1
+    };
+	console.log(ob);
+	down = true;
+	dragBegin = ob;
+			
+}
+window.onmouseup= function(event){
+	down = false;
+}
 window.onkeydown = function(event) {
 	let key = String.fromCharCode(event.keyCode).toLowerCase();
 	switch(key){
@@ -273,15 +408,22 @@ window.onkeydown = function(event) {
 			
 		//TODO MOVEMENT, Rotationdan sonraki directionlara bak
 		case 'w':
+			moveSound.play();
 			move(objects[objects.length-1],move_scale,directions.FRONT);
 			break;
 		case 'a':
+		
+			moveSound.play();
 			move(objects[objects.length-1],move_scale,directions.LEFT);
 			break;
 		case 's':
+		
+			moveSound.play();
 			move(objects[objects.length-1],move_scale,directions.BEHIND);
 			break;
 		case 'd':
+		
+			moveSound.play();
 			move(objects[objects.length-1],move_scale,directions.RIGHT);
 			break;
 		case ' ':
