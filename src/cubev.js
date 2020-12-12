@@ -14,12 +14,15 @@ var camera_theta_loc; //stores camera coordinate address on WebGL
 var cameraSpeed = 4; //cameraSpeed
 
 const Y_LIMIT = 0.4; //y coordianate limit for game end condition
-const gravity_speed_init = 0.0001; //initial gravity_speed
+const gravity_speed_init = 0.0005; //initial gravity_speed
 var gravity_speed = gravity_speed_init; //gravity_speed
+
+//For testing walls
+const DISPLAY_WALLS = false;
 
 
 var move_scale =edge_length; //movement step size 
-var epsilon = -0.001; //for collusions
+var epsilon = -0.01; //for collusions
 var ended = false; //stores if game ended or not
 var prevTime = 0; //For smoothing movement
 
@@ -76,12 +79,18 @@ function isColliding(obj1,obj2){
 //Check if game ended
 function isgameEnded(){
 	//If any vertice that parsed have a vertex higher than Y_LIMIT, game finished
-	for(var j=1;j<objects.length-1;j++){
+	for(var j=1+walls.length;j<objects.length-1;j++){
 		for(var k=0;k<objects[j].vertices.length;k++)
 			if(objects[j].vertices[k][1]>Y_LIMIT)
 				return true;
 	}
 	return false;
+	
+}
+
+//Commands that executes after game end
+function EndGame(){
+	alert("Game Over");
 	
 }
 
@@ -94,9 +103,11 @@ function boxClsn(mainObj){
 	//If object is asset, then parse it and search for a colliding part
 	if(mainObj.type=="asset"){
 		let cubes = disassemble(mainObj);
-		for(var j=0;j<cubes.length;j++)
-			if(boxClsn(cubes[j])==true)
-				return true;
+		for(var j=0;j<cubes.length;j++){
+			let collidingObjectIndex = boxClsn(cubes[j]);
+			if(collidingObjectIndex>=1)
+				return collidingObjectIndex;
+		}
 	}
 	
 	//If object is a cube, then calculate collusion 
@@ -104,12 +115,12 @@ function boxClsn(mainObj){
 		for(var i=0;i<objects.length-1;i++){
 			let [x,y,z] = getMinMax(objects[i]);
 			if(lineClsn(X,x) && lineClsn(Y,y,0) && lineClsn(Z,z))
-				return true;
+				return i+1;
 			
 		}
 	}
 	
-	return false;
+	return 0;
 	
 }
 
@@ -183,7 +194,7 @@ function detectAndDestroy(){
 	//Check all planes
 	for(var i=ground+(edge_length/2);i<1;i+=edge_length*2){
 		let verticesOnY = [];
-		for(var j=1;j<objects.length;j++){
+		for(var j=1+walls.length;j<objects.length;j++){
 			let k = 0;
 			let y_nx = getMinMax(objects[j])[1];
 			while(k<objects[j].vertices.length && (y_nx[0]<=i && i<=y_nx[1]) ==false )
@@ -198,7 +209,7 @@ function detectAndDestroy(){
 			// Son indexten başa doğru silmek gerek
 			for(var k =verticesOnY.length-1;k>=0;k--)
 				objects.splice(verticesOnY[k],1);
-			for(var j=1;j<objects.length;j++){
+			for(var j=1+walls.length;j<objects.length;j++){
 				move(objects[j],edge_length,directions.DOWN,true);
 			}
 		}
@@ -237,7 +248,7 @@ function createNewAsset(depth_y=false){
 	let colors = [] 
 	for(let i=0;i<4;i++)
 		colors.push([Math.random(),Math.random(),Math.random(),1]);
-	let obj = combineCubes(blueprint,	edge_length,colors,-0.1,0.5,0);		
+	let obj = combineCubes(blueprint,edge_length,colors,...initialAssetCoord);		
 						
 	addToScene(obj);
 	
@@ -312,12 +323,6 @@ window.onload = function init(){
 	render();
 }
 
-//Commands that executes after game end
-function EndGame(){
-	alert("Game Over");
-	
-}
-
 //MAIN: Render Loop
 function render(){
 	
@@ -325,7 +330,7 @@ function render(){
 	var deltaTime = (Date.now() - prevTime)/10; //divide by 10 for normalization
 	
 	if(ended==false){
-		if(boxClsn(objects[objects.length-1])==false)
+		if(boxClsn(objects[objects.length-1])==0)
 			move(objects[objects.length-1],gravity_speed*deltaTime,directions.DOWN);
 		else{
 			stackSound.play();
@@ -351,8 +356,10 @@ function render(){
 	
 	//Render Object and Continue to loop
 	prevTime = Date.now();
-	for(var i=0;i<objects.length;i++)
-		buffer(objects[i]);
+	for(var i=0;i<objects.length;i++){
+		if(DISPLAY_WALLS || walls.includes(i)==false)
+			buffer(objects[i]);
+	}
 	requestAnimFrame( render );
 }
 
@@ -402,6 +409,7 @@ function move(object,move_scale,dir_enum,ignore_collusions=false){
 	let index = dir_enum[0];
 	let direction = dir_enum[1];
 	
+	let prev = copy(object.vertices);
 	//Get all vertices and add to its given coordinates
 	let vertices = object.vertices;
 	for(let i=0;i<vertices.length;i++)
@@ -409,4 +417,6 @@ function move(object,move_scale,dir_enum,ignore_collusions=false){
 		
 	//set new vertices, it will be rendered on next render
 	object.vertices = vertices;
+	if(dir_enum!=directions.DOWN &&  boxClsn(object)>=1)
+		object.vertices = prev;
 }

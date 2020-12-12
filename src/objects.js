@@ -4,39 +4,42 @@ var h_count = 4;
 var w = edge_length*w_count;
 var h = 0.05;
 var d = edge_length*h_count;
-var ground = -0.7;
+var ground = -0.5;
 var l = 0.01;
-
+var initialAssetCoord = [-0.4,0.5,0]
 //First objects
 var initObjects = [
-	/*DÜZEY*/ createRect(-0.1,ground,-0.3,
+	/*DÜZEY*/ createRect(-0.4,ground,0,
 				w,h,d,
 				[[0.7, 0.7, 0.7, 1.0]]),
 				
-				/*createRect(-0.5,0.3,-0.6,
-				0.1,w+0.4,d,
+				createRect(-0.5,0.7,0,
+				0.1,2,d,
 				[[0.0, 0.0, 1.0, 1.0]]),
 				
-				createRect(-0.4,0.3,-0.6-edge_length,
-				w,w+0.4,0.1,
+				createRect(-0.4,0.7,0-edge_length,
+				w,2,0.1,
 				[[0.0, 0.0, 1.0, 1.0]]),
 				
-				createRect(-0.4,0.3,-0.6+d,
-				w,w+0.4,0.1,
+				createRect(-0.4,0.7,0+d,
+				w,2,0.1,
 				[[0.0, 0.0, 1.0, 1.0]]),
 				
-				createRect(-0.4+w,0.3,-0.6,
-				0.1,w+0.4,d,
-				[[0.0, 0.0, 1.0, 1.0]]),*/
+				createRect(-0.4+w,0.7,0,
+				0.1,2,d,
+				[[0.0, 0.0, 1.0, 1.0]]),
 
 			combineCubes([
 						 //En ön
-							[3,4,4,4], //Üst
+							[1], //Üst
 							
 						],
-						edge_length,[[0.8, 0.8, 0.0, 1]],-0.1,0.5,0)		
+						edge_length,[[0.8, 0.8, 0.0, 1]],...initialAssetCoord)		
 ]
-	
+
+//Make invisible objects such as walls
+walls = [1,2,3,4];
+
 //Get 4 indices and generate 6 indices for cube
 function quad(indicesOriginal){
 	let indices = indicesOriginal;
