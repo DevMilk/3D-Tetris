@@ -19,7 +19,7 @@ var gravity_speed = gravity_speed_init; //gravity_speed
 
 //For testing walls
 const DISPLAY_WALLS = false;
-
+const DISABLE_DEPTH = false;
 
 var move_scale =edge_length; //movement step size 
 var epsilon = -0.01; //for collusions
@@ -90,7 +90,7 @@ function isgameEnded(){
 
 //Commands that executes after game end
 function EndGame(){
-	alert("Game Over");
+	
 	
 }
 
@@ -299,7 +299,8 @@ window.onload = function init(){
     if ( !gl ) { alert( "WebGL isn't available" ); }
     gl.viewport( 0, 0, canvas.width, canvas.height );
     gl.clearColor( 0.1,	0.04,	0.17,   1.0 );
-    gl.enable(gl.DEPTH_TEST);
+	if(!DISABLE_DEPTH)
+		gl.enable(gl.DEPTH_TEST);
 	program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
 	

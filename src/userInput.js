@@ -55,7 +55,7 @@ window.addEventListener('wheel', ({ deltaY }) => {
 	//ZOOM
 	
 	let mousePos = getMousePos(event);
-	cameraTheta[3] += deltaY/1000;
+	cameraTheta[3] += deltaY/3000;
 	
 	//IF zoomed out then get camera coordinates to normal
 	if(deltaY>0)
