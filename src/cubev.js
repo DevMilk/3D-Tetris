@@ -1,5 +1,4 @@
 "use strict";
-//TODO: ÇOK YAKIN OLUNCA YA DA HAVADA COLLUSION OLUNCA DURUYOR
 var canvas;
 var gl;
 
@@ -8,10 +7,12 @@ var objects = []
 var mainObject = null;
 var mainObjectIndex = initObjects.length-1; //son tanımlanan obje ana objemiz
 var GroundObject;
-var cameraTheta = [-12,26,0];
+var cameraTheta = [-12,26,0,1.0];
+var cameraCoord = [0,0];
+var cameraCoordLoc; 
 var camera_theta_loc;
 var idle_rotation_vel = 1.0;
-const gravity_speed_init = 0.001;
+const gravity_speed_init = 0.0001;
 var gravity_speed = gravity_speed_init;
 var direction = 1;
 var move_scale =edge_length;
@@ -38,7 +39,6 @@ class Object{
 	constructor(obj){
 		this.vertices = [];
 		this.colors = [];
-		this.theta = [1,1,1];
 		for(var i=0;i<obj.vertices.length;i++){
 			this.vertices.push([0,0,0]);
 			for(var j=0;j<3;j++)
@@ -52,13 +52,8 @@ class Object{
 		this.type = obj.type;
 	}
 	
-	setTheta = function(theta){this.theta = [...theta]};
-	setThetaLoc = function(thetaLoc){this.thetaLoc = thetaLoc};
 	setVertices = function(vertices){ this.vertices = vertices; }
-	changeTheta = function(index,new_value){this.theta[index] = new_value%360};
-	getTheta = function(){ return this.theta; }
 	getType = function(){ return this.type; }
-	getThetaLoc = function(){ return this.thetaLoc; }
 	getVertices = function(){ return this.vertices; }
 	getColors = function(){ return this.colors; }
 	getIndices = function(){ return this.indices; }
@@ -79,6 +74,7 @@ function isColliding(obj1,obj2){
 	if(lineClsn(X,x) && lineClsn(Y,y,0) && lineClsn(Z,z)){
 		return true;
 	}
+	return false;
 	
 }
 
@@ -183,12 +179,9 @@ function detectAndDestroy(){
 		let verticesOnY = [];
 		for(var j=1;j<objects.length;j++){
 			let k = 0;
-			let duzlem = [-0.1,i,-0.3]
 			let y_nx = getMinMax(objects[j])[1];
 			while(k<objects[j].vertices.length && (y_nx[0]<=i && i<=y_nx[1]) ==false )
 				k++;
-			console.log(objects[j].vertices.length)
-			console.log("k: ",k);
 			if(k<objects[j].vertices.length)
 				verticesOnY.push(j);
 
@@ -204,7 +197,7 @@ function detectAndDestroy(){
 		for(var k =verticesOnY.length-1;k>=0;k--)
 			objects.splice(verticesOnY[k],1);
 		for(var j=1;j<objects.length;j++){
-			move(objects[j],edge_length,directions.DOWN);
+			move(objects[j],edge_length,directions.DOWN,true);
 		}
 	}
 	}
@@ -216,8 +209,8 @@ function randomFromArr(arr){
 }
 function createNewAsset(){
 	let blueprint = [1];
-	let depth_seeds = [0,0,1,1,2,2,3,4]; //seeds for depth
-	let hw_seeds = [1,2,2,2,3,3,4];
+	let depth_seeds = [0,1,1,2,2]; //seeds for depth
+	let hw_seeds = [1,2,2,2,3];
 	let h = randomFromArr([1]);
 	let w = randomFromArr(hw_seeds);
 	for(let i=0;i<h;i++){
@@ -229,7 +222,11 @@ function createNewAsset(){
 		blueprint.push(arr);
 		
 	}
-	let obj = combineCubes(blueprint,	edge_length,[[0.8, 0.8, 0.0, 1],[0, 0.8, 0.8, 1],[0.8, 0, 0.8, 1]],-0.1,0.5,0);		
+	let colors = [] 
+	for(let i=0;i<4;i++)
+		colors.push([Math.random(),Math.random(),Math.random(),1]);
+	console.log("Colors: ",colors);
+	let obj = combineCubes(blueprint,	edge_length,colors,-0.1,0.5,0);		
 						
 	addToScene(obj);
 	
@@ -260,8 +257,6 @@ function buffer(obj){
     gl.vertexAttribPointer( vPosition, 3, gl.FLOAT, false, 0, 0 );
     gl.enableVertexAttribArray( vPosition );
 
-	if(obj.getThetaLoc()==null)
-		obj.setThetaLoc(gl.getUniformLocation(program, "theta"));
 	
 	gl.drawElements(gl.TRIANGLES, obj.getIndices().length, gl.UNSIGNED_BYTE, 0);
 	
@@ -276,7 +271,7 @@ window.onload = function init(){
     if ( !gl ) { alert( "WebGL isn't available" ); }
 
     gl.viewport( 0, 0, canvas.width, canvas.height );
-    gl.clearColor( 0.2, 0.2, 0.2, 1.0 );
+    gl.clearColor( 0.1,	0.04,	0.17,   1.0 );
 
     gl.enable(gl.DEPTH_TEST);;
 	console.log("Sahnedeki obje sayısı: ",initObjects.length);
@@ -290,10 +285,14 @@ window.onload = function init(){
 	
 	console.log(initObjects[2]);
 	GroundObject = objects[1];
+	
 	camera_theta_loc = gl.getUniformLocation(program, "camera");
+	gl.uniform4fv(camera_theta_loc, cameraTheta); //init camera
+	
 	mainObject = objects[mainObjectIndex];
 	
-	gl.uniform3fv(camera_theta_loc, cameraTheta); //init camera
+	cameraCoordLoc = gl.getUniformLocation(program, "cameraCoord");
+    gl.uniform2fv(cameraCoordLoc, cameraCoord);
 	prevTime = Date.now();
 	render();
 }
@@ -324,27 +323,14 @@ function render(){
 	}
 	
 	prevTime = Date.now();
-	for(var i=0;i<objects.length;i++){
-		gl.uniform3fv(objects[i].getThetaLoc(), objects[i].getTheta()); //theta, html'de uniform vec3 olarak tanımlandı, uniform3fv ile değer aktarması yapıyoruz
-		
+	for(var i=0;i<objects.length;i++){		
 		buffer(objects[i]);
-		
 	}
 	requestAnimFrame( render );
 }
 
 var down = false;
 var dragBegin;
-window.onmousemove = function(event){
-	if(!down) return;
-	let differences = [event.clientX-dragBegin[0],event.clientY-dragBegin[1]];
-	console.log(differences[0]);
-	console.log(objects[objects.length-1].vertices[0])
-	for(var i=0;i<objects[objects.length-1].vertices.length;i++){
-		move(objects[objects.length-1],move_scale*(differences[0]/(512*8)),directions.RIGHT);
-	}
-	
-}
 
 function multiply(a, b) {
   var aNumRows = a.length, aNumCols = a[0].length,
@@ -361,25 +347,71 @@ function multiply(a, b) {
   }
   return m;
 }
-
-
+function getMousePos(event) {
+    var rect = canvas.getBoundingClientRect();
+    return {
+      x: (event.clientX - rect.left)/rect.width -1/2,
+      y: (event.clientY - rect.top)/rect.height -1/2
+    };
+}
 
 window.onmousedown = function(event){
-	var rect = canvas.getBoundingClientRect();
-    let ob =  {
-      x: (event.clientX - rect.left)*2/rect.width -1,
-      y: (-(event.clientY - rect.top))*2/rect.height +1
-    };
-	console.log(ob);
+	console.log("event: ",event)
+	dragBegin =  {
+	  x: event.clientX,
+	  y: event.clientY
+	};
+	console.log(dragBegin);
 	down = true;
-	dragBegin = ob;
 			
 }
 window.onmouseup= function(event){
 	down = false;
 }
+window.onmousemove = function(event){
+	if(!down) return;
+	
+	console.log(event)
+	let differences = [event.clientX-dragBegin.x,event.clientY-dragBegin.y];
+	let x_change = differences[0]/25;
+	let y_change = differences[1]/25;
+	console.log(event.button);
+	if(event.buttons == 4){
+		cameraCoord[0] += -x_change/10;
+		cameraCoord[1] += y_change/10;
+		gl.uniform2fv(cameraCoordLoc, cameraCoord);
+	}
+	else{
+		rotateCamera(directions.LEFT,scale=x_change);
+		rotateCamera(directions.UP ,scale=y_change);
+	}
+	dragBegin.x = event.clientX;
+	dragBegin.y = event.clientY;
+	/*for(var i=0;i<objects[objects.length-1].vertices.length;i++){
+		move(objects[objects.length-1],move_scale*(differences[0]/(512*8)),directions.RIGHT);
+	}*/
+	
+}
+window.addEventListener('wheel', ({ deltaY }) => {
+
+	//console.log(event.clientX,event.clientY,deltaY);
+	let mousePos = getMousePos(event);
+	cameraTheta[3] += deltaY/1000;
+	if(deltaY>0){
+		cameraCoord = [0,0];
+	}
+	else{
+		cameraCoord[0] += -mousePos.x;
+		cameraCoord[1] += mousePos.y;
+	}
+
+	gl.uniform2fv(cameraCoordLoc, cameraCoord);
+	gl.uniform4fv(camera_theta_loc, cameraTheta);
+});
+
 window.onkeydown = function(event) {
 	let key = String.fromCharCode(event.keyCode).toLowerCase();
+	console.log(cameraTheta);
 	switch(key){
 		
 		//ROTATİON
@@ -409,22 +441,22 @@ window.onkeydown = function(event) {
 		//TODO MOVEMENT, Rotationdan sonraki directionlara bak
 		case 'w':
 			moveSound.play();
-			move(objects[objects.length-1],move_scale,directions.FRONT);
+			move(objects[objects.length-1],move_scale,directionFix(directions.BEHIND));
 			break;
 		case 'a':
 		
 			moveSound.play();
-			move(objects[objects.length-1],move_scale,directions.LEFT);
+			move(objects[objects.length-1],move_scale,directionFix(directions.LEFT));
 			break;
 		case 's':
 		
 			moveSound.play();
-			move(objects[objects.length-1],move_scale,directions.BEHIND);
+			move(objects[objects.length-1],move_scale,directionFix(directions.FRONT));
 			break;
 		case 'd':
 		
 			moveSound.play();
-			move(objects[objects.length-1],move_scale,directions.RIGHT);
+			move(objects[objects.length-1],move_scale,directionFix(directions.RIGHT));
 			break;
 		case ' ':
 			gravity_speed = 0.01;
@@ -443,36 +475,50 @@ window.onkeyup = function(){
 	}
 }
 
-function rotate(object,dir_enum){
-	if(boxClsn(object))
-		return
-	let index = 1 - dir_enum[0];
-	let direction = (2*index-1)*dir_enum[1]; // 0 ise negatif, 1 ise pozitifi 
-	object.changeTheta(index,object.getTheta()[index]+direction*rotate_scale); 
+function directionFix(dir_enum){
+	//[-135,-45], [225,315] arasında, front -> left, right->front ,left-> behind, behind->right, 
+	//[45,135], [-315,-225] arasında front -> right, right ->behind, left->front, behind-> left
+	//[-45,45],[-405,-315], [315,360]arasında normal 
+	//[-135,-225], [135,225] arasında front->behind, right->left, left->right, behind->front
+	let degr = cameraTheta[1];
+	let order = [directions.FRONT,directions.LEFT,directions.BEHIND,directions.RIGHT];
+	function interval(dest1,dest2){
+		return degr>=dest1 && degr<=dest2; 
+	}
+	let d = 360;
+	if(interval(-45,45) || interval(-405,-315) || interval(-360,-315))
+		return dir_enum;
+	//-90 0 270 360
+	if(interval(-135,-45) || interval(225,315)){
+		return order[(order.findIndex((x)=>{return x==dir_enum})+1)%4];
+	}
+	
+	else if(interval(45,135) || interval(-315,-225)){
+		return order[(order.findIndex((x)=>{return x==dir_enum})+3)%4];
+	}
+	else{
+		return order[(order.findIndex((x)=>{return x==dir_enum})+2)%4];
+		
+	}
+	
 	
 }
-
-function rotateCamera(dir_enum){
+function rotateCamera(dir_enum,scale=1){
 	let index = 1 - dir_enum[0];
 	let direction = (2*index-1)*dir_enum[1]; // 0 ise negatif, 1 ise pozitifi 
-	cameraTheta[index]=(cameraTheta[index]+direction*cameraSpeed)%360;
-	gl.uniform3fv(camera_theta_loc, cameraTheta);
+	cameraTheta[index]=(cameraTheta[index]+direction*scale*cameraSpeed)%360;
+	gl.uniform4fv(camera_theta_loc, cameraTheta);
 }
 
-function move(object,move_scale,dir_enum){
-	if(boxClsn(object)) //Sadece a
+function move(object,move_scale,dir_enum,ignore_collusions=false){
+	if(ignore_collusions==false && boxClsn(object)) //Sadece a
 		return
 	let index = dir_enum[0];
 	let direction = dir_enum[1];
-	let pay = 180 - Math.abs(object.getTheta()[1-index]);
-	let direction_rotation_fix = 1;//pay/Math.abs(pay) ; //180 derece olayı var
 	
 	let vertices = object.getVertices();
-	let prevVertices = []
-	prevVertices.push( object.getVertices());
-	let prev = prevVertices[0];
 	for(let i=0;i<vertices.length;i++)
-			vertices[i][index]+=direction*move_scale*direction_rotation_fix;
+			vertices[i][index]+=direction*move_scale;
 	object.setVertices(vertices);
 }
 

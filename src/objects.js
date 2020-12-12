@@ -9,7 +9,7 @@ var l = 0.01;
 var initObjects = [
 	/*DÜZEY*/ createRect(-0.1,ground,-0.3,
 				w,h,d,
-				[[0.0, 0.0, 0.4, 1.0], [1.0, 0.0, 1.0, 1.0]]),
+				[[0.7, 0.7, 0.7, 1.0]]),
 				
 				/*createRect(-0.5,0.3,-0.6,
 				0.1,w+0.4,d,
@@ -38,11 +38,10 @@ var initObjects = [
 
 			combineCubes([
 						 //En ön
-							[w_count,w_count,w_count,w_count-1], //Üst
-							
+							[3,4,4,4], //Üst
 							
 						],
-						edge_length,[[0.8, 0.8, 0.0, 1],[0, 0.8, 0.8, 1],[0.8, 0, 0.8, 1]],-0.1,0.5,0)		
+						edge_length,[[0.8, 0.8, 0.0, 1]],-0.1,0.5,0)		
 ]
 	
 

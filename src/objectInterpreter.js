@@ -59,7 +59,7 @@ function createRect(x,y,z,a,b,c,colors){
   "type":"rect"
   }
   for(var i=0;i<rect.vertices.length;i++)
-	  rect.colors.push(colors[i%colors.length]);
+	  rect.colors.push(colors[(i*4)%colors.length]);
   rect.indices = quad(rect.indices);
   return rect;
 	
