@@ -1,19 +1,19 @@
 var edge_length = 0.1; //edge length of cubes
-var w_count = 6;
-var h_count = 6;
+var w_count = 5;
+var h_count = 4;
 var w = edge_length*w_count;
 var h = 0.05;
 var d = edge_length*h_count;
 var ground = -0.5;
 var l = 0.01;
-var initialAssetCoord = [-0.2,0.5,0.2]
+var initialAssetCoord = [-0.2,0.7,0.2]
 var wallTransparency = 0.0;
 var wallLength = 1.3;
 var wallPivot = 0.8;
 //First objects
 var initObjects = [
 	/*DÜZEY*/ createRect(-0.4,ground,0,
-				w,h,d,
+				w,2*h,d,
 				[[0.7, 0.7, 0.7, 1.0]]),
 				
 				createRect(-0.5,wallPivot,0,
@@ -34,7 +34,7 @@ var initObjects = [
 
 			combineCubes([
 						 //En ön
-							[1], //Üst
+							[3,3], //Üst
 							
 						],
 						edge_length,[[0.8, 0.8, 0.0, 1]],...initialAssetCoord)		

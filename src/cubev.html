@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html  >
 <head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <link rel="stylesheet" href="GUI.css">
@@ -9,6 +9,7 @@
 <source src="stack.mp3" type="audio/mp3">
 <title>3D Tetris</title>
 </head>
+
 <script id="vertex-shader" type="x-shader/x-vertex">
 
 attribute  vec4 vPosition;
@@ -76,7 +77,6 @@ void main()
     gl_Position.z = -gl_Position.z; // Dönme yönünü ters çevirir
 }
 </script>
-
 <script id="fragment-shader" type="x-shader/x-fragment">
 
 precision mediump float;

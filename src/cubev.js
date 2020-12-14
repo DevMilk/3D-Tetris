@@ -13,19 +13,18 @@ var cameraCoordLoc;  //stores camera coordinate address on WebGL
 var camera_theta_loc; //stores camera coordinate address on WebGL
 var cameraSpeed = 4; //cameraSpeed
 
-const Y_LIMIT = 0.4; //y coordianate limit for game end condition
+const Y_LIMIT = initialAssetCoord[1]-edge_length; //y coordianate limit for game end condition
 const gravity_speed_init = 0.0005; //initial gravity_speed
 var gravity_speed = gravity_speed_init; //gravity_speed
 
 //For testing walls
 const DISPLAY_WALLS = false;
-const DISABLE_DEPTH = false;
 
 var move_scale =edge_length; //movement step size 
-var epsilon = -0.01; //for collusions
+var epsilon = -0.000001; //for collusions
 var ended = false; //stores if game ended or not
 var prevTime = 0; //For smoothing movement
-
+var TimeStopTicket = false; //For time stop when game paused
 //Enumeration for directions
 const directions = {
 	"RIGHT"	: [ 0,1],
@@ -92,6 +91,11 @@ function isgameEnded(){
 function EndGame(){
 	
 	
+}
+
+function gamePaused(){
+	document.getElementsByTagName("body")[0].style="filter:blur(2px);";
+
 }
 
 //Check collusion for main object
@@ -202,7 +206,6 @@ function detectAndDestroy(){
 			if(k<objects[j].vertices.length)
 				verticesOnY.push(j)
 		}
-		
 		//If plane is full, then delete all
 		if(verticesOnY.length >= w_count*h_count){
 			// Birden fazla itemi silerken shft etme olayı da olduğu için
@@ -228,7 +231,7 @@ function createNewAsset(depth_y=false){
 	
 	let blueprint = [1]; //initial blueprint
 	let depth_seeds = [0,1,1,2,2]; //seeds for depth
-	let hw_seeds = [1,2,2,2,3];
+	let hw_seeds = [1,2,2,2,3,3];
 	
 	//Elements of random structure
 	let h = randomFromArr([1]);
@@ -299,8 +302,7 @@ window.onload = function init(){
     if ( !gl ) { alert( "WebGL isn't available" ); }
     gl.viewport( 0, 0, canvas.width, canvas.height );
     gl.clearColor( 0.1,	0.04,	0.17,   1.0 );
-	if(!DISABLE_DEPTH)
-		gl.enable(gl.DEPTH_TEST);
+	gl.enable(gl.DEPTH_TEST);
 	program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
 	
@@ -324,44 +326,61 @@ window.onload = function init(){
 	render();
 }
 
+
 //MAIN: Render Loop
 function render(){
 	
-    gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-	var deltaTime = (Date.now() - prevTime)/10; //divide by 10 for normalization
-	
-	if(ended==false){
-		if(boxClsn(objects[objects.length-1])==0)
-			move(objects[objects.length-1],gravity_speed*deltaTime,directions.DOWN);
-		else{
-			stackSound.play();
-			
-			/*
-			Dissassemble asset to cubes for preventing collusion detection 
-			on 2 asset which is possible on future
-			*/
-			
-			let newCubesToAdd = disassemble(objects.pop());
-			for(var i=0;i<newCubesToAdd.length;i++)
-				addToScene(newCubesToAdd[i]);
-			
-			//We execute this function only there for optimization
-			detectAndDestroy();
-			
-			if(isgameEnded())
-				return EndGame();
-			
-			createNewAsset();
+	gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	if(document.hasFocus()){
+		document.getElementsByTagName("body")[0].style="";
+		var deltaTime = (Date.now() - prevTime)/10; //divide by 10 for normalization
+		
+		if(TimeStopTicket){
+			deltaTime ^= deltaTime;
+			TimeStopTicket = false;
 		}
+		if(ended==false){
+			if(boxClsn(objects[objects.length-1])==0)
+				move(objects[objects.length-1],gravity_speed*deltaTime,directions.DOWN);
+			else{
+				stackSound.play();
+				
+				/*
+				Dissassemble asset to cubes for preventing collusion detection 
+				on 2 asset which is possible on future
+				*/
+				
+				let newCubesToAdd = disassemble(objects.pop());
+				for(var i=0;i<newCubesToAdd.length;i++)
+					addToScene(newCubesToAdd[i]);
+				
+				//We execute this function only there for optimization
+				detectAndDestroy();
+				
+				if(isgameEnded())
+					return EndGame();
+				
+				createNewAsset();
+			}
+			for(var i=0;i<objects.length;i++){
+				if(DISPLAY_WALLS || walls.includes(i)==false)
+					buffer(objects[i]);
+			}
+		}
+		
+		//Render Object and Continue to loop
+		
+		prevTime = Date.now();
+		
+	}
+	else{
+		gamePaused();
+		TimeStopTicket = true;
 	}
 	
-	//Render Object and Continue to loop
-	prevTime = Date.now();
-	for(var i=0;i<objects.length;i++){
-		if(DISPLAY_WALLS || walls.includes(i)==false)
-			buffer(objects[i]);
-	}
+
 	requestAnimFrame( render );
+	
 }
 
 //Fix movement for camera perspective
@@ -404,8 +423,7 @@ function rotateCamera(dir_enum,scale=1){
 
 //Move Object
 function move(object,move_scale,dir_enum,ignore_collusions=false){
-	if(ignore_collusions==false && boxClsn(object)) 
-		return
+	
 	//Get index and direction from enum.
 	let index = dir_enum[0];
 	let direction = dir_enum[1];
@@ -418,6 +436,6 @@ function move(object,move_scale,dir_enum,ignore_collusions=false){
 		
 	//set new vertices, it will be rendered on next render
 	object.vertices = vertices;
-	if(dir_enum!=directions.DOWN &&  boxClsn(object)>=1)
+	if(ignore_collusions==false && dir_enum!=directions.DOWN &&  boxClsn(object)>=1)
 		object.vertices = prev;
 }
