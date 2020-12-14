@@ -19,12 +19,16 @@ var gravity_speed = gravity_speed_init; //gravity_speed
 
 //For testing walls
 const DISPLAY_WALLS = false;
+const ALLOW_PREV_VERTICES = false;
+const OBJECT_DEPTH = false;
 
 var move_scale =edge_length; //movement step size 
 var epsilon = -0.000001; //for collusions
 var ended = false; //stores if game ended or not
 var prevTime = 0; //For smoothing movement
 var TimeStopTicket = false; //For time stop when game paused
+var prevVertices = null;
+
 //Enumeration for directions
 const directions = {
 	"RIGHT"	: [ 0,1],
@@ -38,6 +42,7 @@ const directions = {
 //Sounds
 var moveSound;
 var stackSound;
+var stackCompleteSound;
 
 //Game Object
 class Object{
@@ -56,6 +61,13 @@ class Object{
 		this.indices = obj.indices;
 		this.type = obj.type;
 	}
+}
+
+//Assign sound files
+function initSounds(){
+	moveSound = new Audio('move.mp3');
+	stackSound = new Audio("stack.mp3");
+	stackCompleteSound = new Audio("stackComplete.mp3");
 }
 
 //Check if 2 min max collusions
@@ -215,6 +227,7 @@ function detectAndDestroy(){
 			for(var j=1+walls.length;j<objects.length;j++){
 				move(objects[j],edge_length,directions.DOWN,true);
 			}
+			stackCompleteSound.play();
 		}
 	}
 	
@@ -227,7 +240,7 @@ function randomFromArr(arr){
 }
 
 //Create new object randomly
-function createNewAsset(depth_y=false){
+function createNewAsset(depth_y=OBJECT_DEPTH){
 	
 	let blueprint = [1]; //initial blueprint
 	let depth_seeds = [0,1,1,2,2]; //seeds for depth
@@ -265,11 +278,12 @@ function addToScene(newObject){
 
 //Render Object
 function buffer(obj){
+	
 	function setBuffer(array){
-	gl.bindBuffer( gl.ARRAY_BUFFER, gl.createBuffer() );
-    gl.bufferData( gl.ARRAY_BUFFER, flatten(array), gl.STATIC_DRAW );
-
+		gl.bindBuffer( gl.ARRAY_BUFFER, gl.createBuffer() );
+		gl.bufferData( gl.ARRAY_BUFFER, flatten(array), gl.STATIC_DRAW );
 	}
+	
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint8Array(obj.indices), gl.STATIC_DRAW);
 
@@ -292,9 +306,8 @@ function buffer(obj){
 //Initialize Scene
 window.onload = function init(){
 	
-	//Assign sounds
-	moveSound = new Audio('move.mp3');
-	stackSound = new Audio("stack.mp3");
+	//Initialize sound variables
+	initSounds();
 	
 	//Initialize webGL
     canvas = document.getElementById( "gl-canvas" );
@@ -341,7 +354,7 @@ function render(){
 		}
 		if(ended==false){
 			if(boxClsn(objects[objects.length-1])==0)
-				move(objects[objects.length-1],gravity_speed*deltaTime,directions.DOWN);
+				prevVertices = move(objects[objects.length-1],gravity_speed*deltaTime,directions.DOWN);
 			else{
 				stackSound.play();
 				
@@ -349,6 +362,9 @@ function render(){
 				Dissassemble asset to cubes for preventing collusion detection 
 				on 2 asset which is possible on future
 				*/
+				
+				if(ALLOW_PREV_VERTICES && prevVertices!=null)
+					objects[objects.length-1].vertices = prevVertices;
 				
 				let newCubesToAdd = disassemble(objects.pop());
 				for(var i=0;i<newCubesToAdd.length;i++)
@@ -438,4 +454,5 @@ function move(object,move_scale,dir_enum,ignore_collusions=false){
 	object.vertices = vertices;
 	if(ignore_collusions==false && dir_enum!=directions.DOWN &&  boxClsn(object)>=1)
 		object.vertices = prev;
+	return prev;
 }
