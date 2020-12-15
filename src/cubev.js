@@ -205,10 +205,10 @@ function detectAndDestroy(){
 //Eğer aynı y'ye sahip w*d*4 tane vertice = w*d tane küp varsa o vertice'ler silinir 
 
 //y değerleri üzerinde iterasyon
-
-	let objectsToDelete = [];
+	
+	let objectIndexesAtRow = [];
 	//Check all planes
-	for(var i=ground+(edge_length/2);i<1;i+=edge_length*2){
+	for(var i=ground+(edge_length/2);i<1;i+=edge_length){
 		let verticesOnY = [];
 		for(var j=1+walls.length;j<objects.length;j++){
 			let k = 0;
@@ -220,15 +220,27 @@ function detectAndDestroy(){
 		}
 		//If plane is full, then delete all
 		if(verticesOnY.length >= w_count*h_count){
+
+			//Silinme sonrası indexler değişeceği için aşağı itmeyi ilk önce yapmalıyım
+			for(var j=1+walls.length;j<objects.length;j++){
+				//Objects at lower should not be move down
+				if(objectIndexesAtRow.includes(j) || verticesOnY.includes(j))
+					continue;
+				move(objects[j],edge_length,directions.DOWN,true);
+			}
+			
 			// Birden fazla itemi silerken shft etme olayı da olduğu için
 			// Son indexten başa doğru silmek gerek
 			for(var k =verticesOnY.length-1;k>=0;k--)
 				objects.splice(verticesOnY[k],1);
-			for(var j=1+walls.length;j<objects.length;j++){
-				move(objects[j],edge_length,directions.DOWN,true);
-			}
+
 			stackCompleteSound.play();
 		}
+		else{
+			//If they wont be deleted, then they wont move down
+			objectIndexesAtRow.push(...verticesOnY);
+		}
+		
 	}
 	
 }
@@ -240,16 +252,18 @@ function randomFromArr(arr){
 }
 
 //Create new object randomly
-function createNewAsset(depth_y=OBJECT_DEPTH){
+function createNewAsset(depth_y=OBJECT_DEPTH,connected_components=true){
 	
 	let blueprint = [1]; //initial blueprint
-	let depth_seeds = [0,1,1,2,2]; //seeds for depth
+	let depth_seeds = [0,2,2,3,3]; //seeds for depth
 	let hw_seeds = [1,2,2,2,3,3];
 	
 	//Elements of random structure
 	let h = randomFromArr([1]);
 	if(depth_y)
 		h = randomFromArr(depth_seeds);
+	if(connected_components)
+		depth_seeds = depth_seeds.filter(item => (item!=0));
 	let w = randomFromArr(hw_seeds);
 	
 	//Create Random Structure
@@ -284,21 +298,22 @@ function buffer(obj){
 		gl.bufferData( gl.ARRAY_BUFFER, flatten(array), gl.STATIC_DRAW );
 	}
 	
+	function setAttrib(variable,length){
+		gl.vertexAttribPointer( variable, length, gl.FLOAT, false, 0, 0 );
+		gl.enableVertexAttribArray( variable );
+	}
+	
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint8Array(obj.indices), gl.STATIC_DRAW);
 
 	setBuffer(obj.colors);
 
-    gl.vertexAttribPointer( vColor, 4, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( vColor );
+	setAttrib(vColor,4);
 
 	setBuffer(obj.vertices);
-
-
-    gl.vertexAttribPointer( vPosition, 3, gl.FLOAT, false, 0, 0 );
-    gl.enableVertexAttribArray( vPosition );
-
 	
+	setAttrib(vPosition,3);
+
 	gl.drawElements(gl.TRIANGLES, obj.indices.length, gl.UNSIGNED_BYTE, 0);
 	
 }

@@ -69,9 +69,10 @@ void main()
 	 //vColor*((vPosition.x+vPosition.y+vPosition.z+3.0)/6.0);
 	 //vColor*(vPosition.x*vPosition.y+vPosition.z+2.0);
 	 //vColor*(vPosition.x*vPosition.y+vPosition.z+1.0);;
+	//(cos(vColor*(vPosition.x*vPosition.y+vPosition.z+0.5)));
+	vec3 d = vec3(0.5 + 0.5 * cos(2.0 * vPosition.y + 3.0));
 	
-	vec3 light_src = -vec3(-0.5,1.0, 0.5);
-    fColor = vColor*(vPosition.x*vPosition.y+vPosition.z+1.0);;
+    fColor = ((vColor*(vPosition.x*vPosition.y+vPosition.z+0.5)));
     gl_Position = rz * ry * rx * vPosition * cy * cx *cz;
 	gl_Position.x +=cameraCoord.x;
 	gl_Position.y +=cameraCoord.y;

@@ -13,8 +13,8 @@ var wallPivot = 0.8;
 //First objects
 var initObjects = [
 	/*DÜZEY*/ createRect(-0.4,ground,0,
-				w,2*h,d,
-				[[0.7, 0.7, 0.7, 1.0]]),
+				w,1.5*h,d,
+				[[0.75, 0.7, 0.9, 1.0]]),
 				
 				createRect(-0.5,wallPivot,0,
 				0.1,wallLength,d,
