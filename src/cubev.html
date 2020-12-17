@@ -18,62 +18,50 @@ attribute  vec4 vColor;
 varying vec4 fColor;
 uniform vec4 camera;
 uniform vec2 cameraCoord;
+
+float getDistance(vec3 pos, vec3 pos2){
+
+	return abs(pos.x-pos2.x)+abs(pos.y-pos2.y)+abs(pos.z-pos2.z);
+
+}
 void main()
 {
     // Compute the sines and cosines of theta for each of
     //   the three axes in one computation.
-    vec3 angles = radians( vec3(1,1,1) );
-    vec3 c = cos( angles );
-    vec3 s = sin( angles );
 	float zoom = camera.w;
 	vec3 cameraTheta = camera.xyz;
 	vec3 camera_angles = radians( cameraTheta );
     vec3 c_c = cos( camera_angles );
     vec3 c_s = sin( camera_angles );
-    // Remember: these matrices are column-major
-    mat4 rx = mat4( zoom,  0.0,  0.0, 0.0,
-					0.0,  c.x,  s.x, 0.0,
-					0.0, -s.x,  c.x, 0.0,
-					0.0,  0.0,  0.0, zoom );
-
-    mat4 ry = mat4( c.y, 0.0, -s.y, 0.0,
-					0.0, zoom,  0.0, 0.0,
-					s.y, 0.0,  c.y, 0.0,
-					0.0, 0.0,  0.0, zoom );
-
-
-    mat4 rz = mat4( c.z, s.z, 0.0, 0.0,
-				   -s.z,  c.z, 0.0, 0.0,
-					0.0,  0.0, zoom, 0.0,
-					0.0,  0.0, 0.0, zoom );
 					
 					
 	//Kamera için yaptım
-	mat4 cx = mat4( 1.0,  0.0,  0.0, 0.0,
+	mat4 cx = mat4( zoom,  0.0,  0.0, 0.0,
 					0.0,  c_c.x,  c_s.x, 0.0,
 					0.0, -c_s.x,  c_c.x, 0.0,
-					0.0,  0.0,  0.0, 1.0 );
+					0.0,  0.0,  0.0, zoom );
 
     mat4 cy = mat4( c_c.y, 0.0, -c_s.y, 0.0,
-					0.0, 1.0,  0.0, 0.0,
+					0.0, zoom,  0.0, 0.0,
 					c_s.y, 0.0,  c_c.y, 0.0,
-					0.0, 0.0,  0.0, 1.0 );
+					0.0, 0.0,  0.0, zoom );
 
 
     mat4 cz = mat4( c_c.z, c_s.z, 0.0, 0.0,
 				   -c_s.z,  c_c.z, 0.0, 0.0,
-					0.0,  0.0, 1.0, 0.0,
-					0.0,  0.0, 0.0, 1.0 );
+					0.0,  0.0, zoom, 0.0,
+					0.0,  0.0, 0.0, zoom);
 
 	 //vColor*(vPosition.x*vPosition.y+vPosition.z+0.6)
 	 //vColor*((vPosition.x+vPosition.y+vPosition.z+3.0)/6.0);
 	 //vColor*(vPosition.x*vPosition.y+vPosition.z+2.0);
 	 //vColor*(vPosition.x*vPosition.y+vPosition.z+1.0);;
-	//(cos(vColor*(vPosition.x*vPosition.y+vPosition.z+0.5)));
-	vec3 d = vec3(0.5 + 0.5 * cos(2.0 * vPosition.y + 3.0));
+	//(cos(vColor*(vPosition.x*vPositWion.y+vPosition.z+0.5)));
+	vec4 cameraNormalized = vec4(c_c.x-cameraCoord.x,c_c.y+cameraCoord.y,c_c.z,1.0);
+	float distance = getDistance(vPosition.xyz,cameraNormalized.xyz);
 	
-    fColor = ((vColor*(vPosition.x*vPosition.y+vPosition.z+0.5)));
-    gl_Position = rz * ry * rx * vPosition * cy * cx *cz;
+    fColor = (vColor*(vPosition.x*vPosition.y+vPosition.z+0.5));
+    gl_Position = vPosition * cy * cx*cz;
 	gl_Position.x +=cameraCoord.x;
 	gl_Position.y +=cameraCoord.y;
     gl_Position.z = -gl_Position.z; // Dönme yönünü ters çevirir
@@ -98,6 +86,7 @@ main()
 <script type="text/javascript" src="userInput.js"></script>
 <body>
 
+<div id="score">Score: 0</div>
 <canvas id="gl-canvas" width="512"" height="512">
 Oops ... your browser doesn't support the HTML5 canvas element
 </canvas>

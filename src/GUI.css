@@ -8,6 +8,7 @@ html{
 
 body{
 	height: -webkit-fill-available;
+	max-height: 90vh;
 	width: -webkit-fill-available;
 }
 canvas{
@@ -26,4 +27,16 @@ canvas{
 	border: 3px solid #009688;
 	border-radius: 30px;
 	
+}
+div{
+	text-align: center;
+	position: relative;
+	color: #009688;
+	font-family:'Work Sans', sans-serif;
+	font-size: 160%;
+	border: 6px ridge #009688;
+	border-radius: 10px;
+	margin-top: 8vh;
+	margin-right: 35vw;
+	margin-left: 35vw;
 }

@@ -8,7 +8,7 @@ var vPosition;
 //Objects and Camera variables
 var objects = [] //stores all objects
 var cameraTheta = [-12,26,0,1.0]; //stores camera angles
-var cameraCoord = [0,0]; //stores camera coordinates
+var cameraCoord = [0.2,0]; //stores camera coordinates
 var cameraCoordLoc;  //stores camera coordinate address on WebGL
 var camera_theta_loc; //stores camera coordinate address on WebGL
 var cameraSpeed = 4; //cameraSpeed
@@ -19,11 +19,11 @@ var gravity_speed = gravity_speed_init; //gravity_speed
 
 //For testing walls
 const DISPLAY_WALLS = false;
-const ALLOW_PREV_VERTICES = false;
-const OBJECT_DEPTH = false;
+const OBJECT_DEPTH = true;
+const SPACE_SPEED = 0.02;
 
 var move_scale =edge_length; //movement step size 
-var epsilon = -0.000001; //for collusions
+var epsilon = -0.05; //for collusions
 var ended = false; //stores if game ended or not
 var prevTime = 0; //For smoothing movement
 var TimeStopTicket = false; //For time stop when game paused
@@ -111,32 +111,37 @@ function gamePaused(){
 }
 
 //Check collusion for main object
+//Returns collided object's index and the overlap distance between the collusion
 function boxClsn(mainObj){
 	//ŞU AN SADECE KÜP İÇİN
 	//Asset'ler küplerden oluşacak
-	const [X,Y,Z] = getMinMax(mainObj);
 	
 	//If object is asset, then parse it and search for a colliding part
 	if(mainObj.type=="asset"){
 		let cubes = disassemble(mainObj);
 		for(var j=0;j<cubes.length;j++){
-			let collidingObjectIndex = boxClsn(cubes[j]);
-			if(collidingObjectIndex>=1)
-				return collidingObjectIndex;
+			let [collidingObjectIndex,distance] = boxClsn(cubes[j]);
+			if(collidingObjectIndex){
+				
+				return [collidingObjectIndex,distance];
+				
+			}
 		}
 	}
 	
 	//If object is a cube, then calculate collusion 
 	else{
+		
+		const [X,Y,Z] = getMinMax(mainObj);
 		for(var i=0;i<objects.length-1;i++){
 			let [x,y,z] = getMinMax(objects[i]);
 			if(lineClsn(X,x) && lineClsn(Y,y,0) && lineClsn(Z,z))
-				return i+1;
+				return [i+1,y[1]-Y[0]]; //Aşağıya doğru olan collusionlar için overlap distance
 			
 		}
 	}
 	
-	return 0;
+	return [0,-1];
 	
 }
 
@@ -192,20 +197,26 @@ function rotateS(object,dir_enum){
 	
 	
 	//If that can cause a collusion, then undo it
-	if(boxClsn(object))
+	if(boxClsn(object)[0])
 		object.vertices = temp;
 	else
 		object.vertices = vertices;
 	
 }
 
+function changeScore(delta){
+	let element = document.getElementById("score");
+	let currentScore = parseInt(element.innerText.split(" ")[1]);
+	currentScore +=delta;
+	element.innerText = "Score: "+currentScore;
+	
+}
 //Detect filled planes, destroy objects from plane and move everything down 
 function detectAndDestroy(){
 	
 //Eğer aynı y'ye sahip w*d*4 tane vertice = w*d tane küp varsa o vertice'ler silinir 
 
 //y değerleri üzerinde iterasyon
-	
 	let objectIndexesAtRow = [];
 	//Check all planes
 	for(var i=ground+(edge_length/2);i<1;i+=edge_length){
@@ -235,6 +246,8 @@ function detectAndDestroy(){
 				objects.splice(verticesOnY[k],1);
 
 			stackCompleteSound.play();
+			
+			changeScore(w_count*h_count*10);
 		}
 		else{
 			//If they wont be deleted, then they wont move down
@@ -254,26 +267,27 @@ function randomFromArr(arr){
 //Create new object randomly
 function createNewAsset(depth_y=OBJECT_DEPTH,connected_components=true){
 	
-	let blueprint = [1]; //initial blueprint
-	let depth_seeds = [0,2,2,3,3]; //seeds for depth
-	let hw_seeds = [1,2,2,2,3,3];
+	let blueprint = []; //initial blueprint
+	let depth_seeds = [1,2,2,3]; //seeds for depth
+	let hw_seeds = [1,2,2,2];
 	
 	//Elements of random structure
 	let h = randomFromArr([1]);
 	if(depth_y)
-		h = randomFromArr(depth_seeds);
+		h = randomFromArr(depth_seeds)%1+1;
 	if(connected_components)
 		depth_seeds = depth_seeds.filter(item => (item!=0));
-	let w = randomFromArr(hw_seeds);
+	let w;
 	
 	//Create Random Structure
 	for(let i=0;i<h;i++){
-		let arr = [];
-		for(let j=0;j<w;j++)
+		let arr = [Math.random()*2+1];
+		w = randomFromArr(hw_seeds)
+		for(let j=0;j<w-1;j++)
 			arr.push(randomFromArr(depth_seeds));
 		blueprint.push(arr);
 	}
-	
+	console.log(blueprint);
 	//Random Colors
 	let colors = [] 
 	for(let i=0;i<4;i++)
@@ -349,6 +363,7 @@ window.onload = function init(){
     for(var i=0;i<initObjects.length;i++)
 		addToScene(initObjects[i]);
 	
+	createNewAsset();
 	//set current time and start render loop
 	prevTime = Date.now();
 	render();
@@ -368,7 +383,9 @@ function render(){
 			TimeStopTicket = false;
 		}
 		if(ended==false){
-			if(boxClsn(objects[objects.length-1])==0)
+			let [CollidedObjectIndex,distance] = boxClsn(objects[objects.length-1]);
+			CollidedObjectIndex -=1;
+			if(CollidedObjectIndex==-1)
 				prevVertices = move(objects[objects.length-1],gravity_speed*deltaTime,directions.DOWN);
 			else{
 				stackSound.play();
@@ -378,13 +395,14 @@ function render(){
 				on 2 asset which is possible on future
 				*/
 				
-				if(ALLOW_PREV_VERTICES && prevVertices!=null)
-					objects[objects.length-1].vertices = prevVertices;
+				//Fix Collusion
+				for(var i=0;i<objects[objects.length-1].vertices.length;i++)
+					objects[objects.length-1].vertices[i][1]+=distance;
 				
 				let newCubesToAdd = disassemble(objects.pop());
 				for(var i=0;i<newCubesToAdd.length;i++)
 					addToScene(newCubesToAdd[i]);
-				
+				changeScore(newCubesToAdd.length*10);
 				//We execute this function only there for optimization
 				detectAndDestroy();
 				
@@ -466,8 +484,7 @@ function move(object,move_scale,dir_enum,ignore_collusions=false){
 			vertices[i][index]+=direction*move_scale;
 		
 	//set new vertices, it will be rendered on next render
-	object.vertices = vertices;
-	if(ignore_collusions==false && dir_enum!=directions.DOWN &&  boxClsn(object)>=1)
+	if(ignore_collusions==false && dir_enum!=directions.DOWN &&  boxClsn(object)[0]>=1)
 		object.vertices = prev;
 	return prev;
 }

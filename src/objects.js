@@ -32,12 +32,6 @@ var initObjects = [
 				0.1,wallLength,d,
 				[[0.0, 0.0, 1.0, wallTransparency]]),
 
-			combineCubes([
-						 //En ön
-							[3,3], //Üst
-							
-						],
-						edge_length,[[0.8, 0.8, 0.0, 1]],...initialAssetCoord)		
 ]
 
 //Make invisible objects such as walls
