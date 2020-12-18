@@ -61,6 +61,7 @@ void main()
 	float distance = getDistance(vPosition.xyz,cameraNormalized.xyz);
 	
     fColor = (vColor*(vPosition.x*vPosition.y+vPosition.z+0.5));
+	fColor = sin(vColor*sin(abs(vPosition+vPosition.x+vPosition.y+vPosition.z)));
     gl_Position = vPosition * cy * cx*cz;
 	gl_Position.x +=cameraCoord.x;
 	gl_Position.y +=cameraCoord.y;
