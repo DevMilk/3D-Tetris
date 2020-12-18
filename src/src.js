@@ -65,9 +65,10 @@ class Object{
 
 //Assign sound files
 function initSounds(){
-	moveSound = new Audio('move.mp3');
-	stackSound = new Audio("stack.mp3");
-	stackCompleteSound = new Audio("stackComplete.mp3");
+	let soundFolder = "soundeffects/";
+	moveSound = new Audio(soundFolder+'move.mp3');
+	stackSound = new Audio(soundFolder+"stack.mp3");
+	stackCompleteSound = new Audio(soundFolder+"stackComplete.mp3");
 }
 
 //Check if 2 min max collusions

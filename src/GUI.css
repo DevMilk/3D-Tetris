@@ -1,9 +1,15 @@
+:root{
+	--mainColor: #009688;
+	--background:  #1c0b2d;
+	--font: 'Work Sans', sans-serif;
+}
 html{
 	width:100%;
 	height:100%;
 	color: white;
-	background: #1c0b2d;
+	background: var(--background);
 	transition: all .5s;
+	font-family: var(--font);
 }
 
 body{
@@ -17,26 +23,38 @@ canvas{
 	display: block;
 	width: 50vw;
 	height: 50vw;
-	max-width: 600px;
-	max-height: 600px;
+	max-width: 700px;
+	max-height: 700px;
 	position: absolute;
 	top: 0;
 	bottom: 0;
 	left: 0;
 	right: 0;
-	border: 3px solid #009688;
+	border: 3px solid var(--mainColor);
 	border-radius: 30px;
 	
 }
 div{
 	text-align: center;
 	position: relative;
-	color: #009688;
-	font-family:'Work Sans', sans-serif;
+	color: var(--mainColor);
+	
 	font-size: 160%;
-	border: 6px ridge #009688;
+	border: 6px ridge var(--mainColor);
 	border-radius: 10px;
 	margin-top: 8vh;
 	margin-right: 35vw;
 	margin-left: 35vw;
+}
+footer, i{
+	 font-size: 160%;
+	  position: fixed;
+	  left: 0;
+	  bottom: 8vh;
+	  width: 100%;
+	  background-color: var(--background);
+	  color: var(--mainColor);
+	  text-align: center;
+	  font-family: inherit;
+	  font-family: var(--font);
 }

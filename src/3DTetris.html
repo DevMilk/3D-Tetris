@@ -2,12 +2,14 @@
 <html  >
 <head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
 <link rel="stylesheet" href="GUI.css">
 
 <link href="https://fonts.googleapis.com/css?family=Montserrat:900|Work+Sans:300" rel="stylesheet">
-<source src="move.mp3" type="audio/mp3">
-<source src="stack.mp3" type="audio/mp3">
-<source src="stackComplete.mp3" type="audio/mp3">
+<source src="soundeffects/move.mp3" type="audio/mp3">
+<source src="soundeffects/stack.mp3" type="audio/mp3">
+<source src="soundeffects/stackComplete.mp3" type="audio/mp3">
 <title>3D Tetris</title>
 </head>
 
@@ -61,7 +63,7 @@ void main()
 	float distance = getDistance(vPosition.xyz,cameraNormalized.xyz);
 	
     fColor = (vColor*(vPosition.x*vPosition.y+vPosition.z+0.5));
-	fColor = sin(vColor*sin(abs(vPosition+vPosition.x+vPosition.y+vPosition.z)));
+	//fColor = sin(vColor*sin(abs(vPosition+vPosition.x+vPosition.y+vPosition.z)));
     gl_Position = vPosition * cy * cx*cz;
 	gl_Position.x +=cameraCoord.x;
 	gl_Position.y +=cameraCoord.y;
@@ -83,7 +85,7 @@ main()
 <script type="text/javascript" src="../Common/webgl-utils.js"></script>
 <script type="text/javascript" src="../Common/initShaders.js"></script>
 <script type="text/javascript" src="../Common/MV.js"></script>
-<script type="text/javascript" src="cubev.js"></script>
+<script type="text/javascript" src="src.js"></script>
 <script type="text/javascript" src="userInput.js"></script>
 <body>
 
@@ -96,5 +98,5 @@ Oops ... your browser doesn't support the HTML5 canvas element
 
 
 </body>
-
+<footer><a href = "https://github.com/DevMilk"><i class="fa fa-github"></i></a></footer>
 </html>
