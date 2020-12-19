@@ -94,9 +94,11 @@ window.onkeydown = function(event) {
 			
 		//Object Rotation
 		case 'q':
+			rotateSound.play();
 			rotateS(objects[objects.length-1],directions.UP);
 			break;
 		case 'e':
+			rotateSound.play();
 			rotateS(objects[objects.length-1],directions.LEFT);
 			break;
 			

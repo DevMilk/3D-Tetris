@@ -43,6 +43,7 @@ const directions = {
 var moveSound;
 var stackSound;
 var stackCompleteSound;
+var rotateSound;
 
 //Game Object
 class Object{
@@ -69,6 +70,7 @@ function initSounds(){
 	moveSound = new Audio(soundFolder+'move.mp3');
 	stackSound = new Audio(soundFolder+"stack.mp3");
 	stackCompleteSound = new Audio(soundFolder+"stackComplete.mp3");
+	rotateSound = new Audio(soundFolder+"rotate.mp3");
 }
 
 //Check if 2 min max collusions
@@ -102,7 +104,8 @@ function isgameEnded(){
 
 //Commands that executes after game end
 function EndGame(){
-	
+	let element = document.getElementById("score");
+	element.innerHTML="Game Over<br>Final "+element.innerHTML;
 	
 }
 
@@ -288,7 +291,6 @@ function createNewAsset(depth_y=OBJECT_DEPTH,connected_components=true){
 			arr.push(randomFromArr(depth_seeds));
 		blueprint.push(arr);
 	}
-	console.log(blueprint);
 	//Random Colors
 	let colors = [] 
 	for(let i=0;i<4;i++)

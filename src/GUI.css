@@ -10,6 +10,16 @@ html{
 	background: var(--background);
 	transition: all .5s;
 	font-family: var(--font);
+	   -moz-user-select: -moz-none;
+   -khtml-user-select: none;
+   -webkit-user-select: none;
+
+   /*
+     Introduced in IE 10.
+     See http://ie.microsoft.com/testdrive/HTML5/msUserSelect/
+   */
+   -ms-user-select: none;
+   user-select: none;
 }
 
 body{
@@ -34,7 +44,7 @@ canvas{
 	border-radius: 30px;
 	
 }
-div{
+#score{
 	text-align: center;
 	position: relative;
 	color: var(--mainColor);
@@ -42,7 +52,8 @@ div{
 	font-size: 160%;
 	border: 6px ridge var(--mainColor);
 	border-radius: 10px;
-	margin-top: 8vh;
+	margin-top: 4vh;
+	margin-bottom: 4vh;
 	margin-right: 35vw;
 	margin-left: 35vw;
 }

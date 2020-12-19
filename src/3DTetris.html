@@ -10,6 +10,7 @@
 <source src="soundeffects/move.mp3" type="audio/mp3">
 <source src="soundeffects/stack.mp3" type="audio/mp3">
 <source src="soundeffects/stackComplete.mp3" type="audio/mp3">
+<source src="soundeffects/rotate.mp3" type="audio/mp3">
 <title>3D Tetris</title>
 </head>
 
@@ -59,11 +60,13 @@ void main()
 	 //vColor*(vPosition.x*vPosition.y+vPosition.z+2.0);
 	 //vColor*(vPosition.x*vPosition.y+vPosition.z+1.0);;
 	//(cos(vColor*(vPosition.x*vPositWion.y+vPosition.z+0.5)));
+	//vColor*(min(mod(vPosition.y,freq)*3.0+0.7,1.0));
 	vec4 cameraNormalized = vec4(c_c.x-cameraCoord.x,c_c.y+cameraCoord.y,c_c.z,1.0);
 	float distance = getDistance(vPosition.xyz,cameraNormalized.xyz);
 	
+	float freq = 0.1;
     fColor = (vColor*(vPosition.x*vPosition.y+vPosition.z+0.5));
-	//fColor = sin(vColor*sin(abs(vPosition+vPosition.x+vPosition.y+vPosition.z)));
+	fColor = fColor/(0.65 + 15.0*pow((mod(abs(vPosition.y),freq)),1.3));
     gl_Position = vPosition * cy * cx*cz;
 	gl_Position.x +=cameraCoord.x;
 	gl_Position.y +=cameraCoord.y;
