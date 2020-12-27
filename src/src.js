@@ -14,13 +14,13 @@ var camera_theta_loc; //stores camera coordinate address on WebGL
 var cameraSpeed = 4; //cameraSpeed
 
 const Y_LIMIT = initialAssetCoord[1]-edge_length; //y coordianate limit for game end condition
-const gravity_speed_init = 0.0005; //initial gravity_speed
+const gravity_speed_init = 0.0005*prompt("Enter difficulity scale",2); //initial gravity_speed
 var gravity_speed = gravity_speed_init; //gravity_speed
 
 //For testing walls
 const DISPLAY_WALLS = false;
-const OBJECT_DEPTH = true;
-const SPACE_SPEED = 0.02;
+const OBJECT_DEPTH = false;
+const SPACE_SPEED = Math.max(0.02,gravity_speed_init*2);
 
 var move_scale =edge_length; //movement step size 
 var epsilon = -0.05; //for collusions
@@ -44,7 +44,7 @@ var moveSound;
 var stackSound;
 var stackCompleteSound;
 var rotateSound;
-
+var fallSound;
 //Game Object
 class Object{
 	constructor(obj){
@@ -71,6 +71,7 @@ function initSounds(){
 	stackSound = new Audio(soundFolder+"stack.mp3");
 	stackCompleteSound = new Audio(soundFolder+"stackComplete.mp3");
 	rotateSound = new Audio(soundFolder+"rotate.mp3");
+	fallSound = new Audio(soundFolder+"fall.wav");
 }
 
 //Check if 2 min max collusions
@@ -106,7 +107,7 @@ function isgameEnded(){
 function EndGame(){
 	let element = document.getElementById("score");
 	element.innerHTML="Game Over<br>Final "+element.innerHTML;
-	
+	canvas.style="border-color: var(--background); box-shadow: 0 0 5vw black;";
 }
 
 function gamePaused(){
@@ -272,12 +273,12 @@ function createNewAsset(depth_y=OBJECT_DEPTH,connected_components=true){
 	
 	let blueprint = []; //initial blueprint
 	let depth_seeds = [1,2,2,3]; //seeds for depth
-	let hw_seeds = [1,2,2,2];
+	let hw_seeds = [2,2,2,3,3];
 	
 	//Elements of random structure
 	let h = randomFromArr([1]);
 	if(depth_y)
-		h = randomFromArr(depth_seeds)%1+1;
+		h = randomFromArr(depth_seeds)%2+1;
 	if(connected_components)
 		depth_seeds = depth_seeds.filter(item => (item!=0));
 	let w;
@@ -297,7 +298,7 @@ function createNewAsset(depth_y=OBJECT_DEPTH,connected_components=true){
 	let obj = combineCubes(blueprint,edge_length,colors,...initialAssetCoord);		
 						
 	addToScene(obj);
-	
+	return obj;
 }
 
 //Add new object to scene
@@ -407,20 +408,27 @@ function render(){
 				changeScore(newCubesToAdd.length*10);
 				//We execute this function only there for optimization
 				detectAndDestroy();
-				
-				if(isgameEnded())
-					return EndGame();
-				
-				createNewAsset();
+				ended = isgameEnded();
+				if(ended)
+					EndGame();
+				else{
+					let created = createNewAsset();
+					let colors = created.colors[0];
+					console.log(colors);
+					let colorStr = "rgb("+colors[0]*255+","+colors[1]*255+","+colors[2]*255+")";
+					canvas.style="border-color: "+colorStr+";";
+					document.getElementById("score").style="border-color: "+colorStr+"; color: "+colorStr+";";
+					
+				}
 			}
-			for(var i=0;i<objects.length;i++){
-				if(DISPLAY_WALLS || walls.includes(i)==false)
-					buffer(objects[i]);
-			}
+
 		}
 		
 		//Render Object and Continue to loop
-		
+		for(var i=0;i<objects.length;i++){
+			if(DISPLAY_WALLS || walls.includes(i)==false)
+				buffer(objects[i]);
+		}
 		prevTime = Date.now();
 		
 	}
@@ -448,7 +456,7 @@ function directionFix(dir_enum){
 	let d = 360;
 	
 	//Normal Direction
-	if(interval(-45,45) || interval(-360,-315))
+	if(interval(-405,-315) || interval(-45,45) )
 		return dir_enum;
 	
 	if(interval(-135,-45) || interval(225,315))

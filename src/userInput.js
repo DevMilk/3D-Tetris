@@ -125,6 +125,8 @@ window.onkeydown = function(event) {
 			
 		//Gravity
 		case ' ':
+			if(gravity_speed!=SPACE_SPEED)
+				fallSound.play();
 			gravity_speed = SPACE_SPEED;
 			break;
 			

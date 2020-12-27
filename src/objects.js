@@ -1,6 +1,21 @@
+//Get Input From User
+function getInput(text,default_val=4,min_val=1){
+	do{
+		var value = prompt(text,default_val);
+		if(value==null)
+		  return
+
+		if (value != parseInt(value, 10)|| value <=min_val-1)
+		  alert("Enter valid number");
+	  
+	}while(value != parseInt(value, 10) || value <=min_val-1);
+
+	return value;
+  
+}
 var edge_length = 0.1; //edge length of cubes
-var w_count = 5;
-var h_count = 4;
+var w_count = getInput("enter width of board",5,4);
+var h_count = getInput("enter height of board",4,4);
 var w = edge_length*w_count;
 var h = 0.05;
 var d = edge_length*h_count;
@@ -14,7 +29,7 @@ var wallPivot = 0.8;
 var initObjects = [
 	/*DÜZEY*/ createRect(-0.4,ground,0,
 				w,1.5*h,d,
-				[[0.75, 0.7, 0.9, 1.0]]),
+				[[0.3, 0.3, 0.8, 1.0]]),
 				
 				createRect(-0.5,wallPivot,0,
 				0.1,wallLength,d,

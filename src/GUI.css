@@ -28,6 +28,7 @@ body{
 	width: -webkit-fill-available;
 }
 canvas{
+	box-shadow: 0 0 5vw black;
 	padding: 0;
 	margin: auto;
 	display: block;
@@ -40,22 +41,24 @@ canvas{
 	bottom: 0;
 	left: 0;
 	right: 0;
-	border: 3px solid var(--mainColor);
+	border: 1vw double black;
 	border-radius: 30px;
+	transition: all .5s;
 	
 }
 #score{
 	text-align: center;
 	position: relative;
-	color: var(--mainColor);
+	color: black;
 	
 	font-size: 160%;
-	border: 6px ridge var(--mainColor);
+	border: 6px ridge black;
 	border-radius: 10px;
 	margin-top: 4vh;
-	margin-bottom: 4vh;
+	margin-bottom: 6vh;
 	margin-right: 35vw;
 	margin-left: 35vw;
+	transition: all .5s;
 }
 footer, i{
 	 font-size: 160%;
@@ -64,8 +67,12 @@ footer, i{
 	  bottom: 8vh;
 	  width: 100%;
 	  background-color: var(--background);
-	  color: var(--mainColor);
+	  color: white;
 	  text-align: center;
 	  font-family: inherit;
 	  font-family: var(--font);
+}
+a{
+	height: min-content;
+	width: min-content;
 }
