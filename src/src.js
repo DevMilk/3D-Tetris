@@ -111,7 +111,6 @@ function EndGame(){
 
 function gamePaused(){
 	document.getElementsByTagName("body")[0].style="filter:blur(2px);";
-
 }
 
 //Check collusion for main object
@@ -171,7 +170,7 @@ function rotateS(object,dir_enum){
 		if(isVertical){
 			
 			let difY = vertices[i][1]-pivot[1];
-			vertices[i][1] += direction*(difZ-difY);
+			vertices[i][1] -= direction*(difY+difZ);
 			vertices[i][2] += direction*(difY-difZ);
 		}
 		else{
@@ -308,7 +307,7 @@ function addToScene(newObject){
 }
 
 //Render Object
-function buffer(obj){
+function buffer(obj,draw=gl.TRIANGLES){
 	
 	function setBuffer(array){
 		gl.bindBuffer( gl.ARRAY_BUFFER, gl.createBuffer() );
@@ -331,7 +330,7 @@ function buffer(obj){
 	
 	setAttrib(vPosition,3);
 
-	gl.drawElements(gl.TRIANGLES, obj.indices.length, gl.UNSIGNED_BYTE, 0);
+	gl.drawElements(draw, obj.indices.length, gl.UNSIGNED_BYTE, 0);
 	
 }
 
@@ -449,13 +448,13 @@ function directionFix(dir_enum){
 	let d = 360;
 	
 	//Normal Direction
-	if(interval(-45,45) || interval(-405,-315) || interval(-360,-315))
+	if(interval(-45,45) || interval(-360,-315))
 		return dir_enum;
 	
 	if(interval(-135,-45) || interval(225,315))
 		return order[(order.findIndex((x)=>{return x==dir_enum})+1)%4];
 	
-	else if(interval(45,135) || interval(-315,-225))
+	else if(interval(-315,-225) || interval(45,135) )
 		return order[(order.findIndex((x)=>{return x==dir_enum})+3)%4];
 	
 	else
