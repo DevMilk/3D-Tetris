@@ -264,7 +264,9 @@ function detectAndDestroy(){
 
 //A Random function
 function randomFromArr(arr){
-	let index = Math.floor((Math.random() * (arr.length-1)));
+	var milliseconds = new Date().getMilliseconds();
+	let rndm = Math.random()+1;
+	let index = Math.floor(rndm *milliseconds) % arr.length;
 	return arr[index];
 }
 
@@ -273,7 +275,7 @@ function createNewAsset(depth_y=OBJECT_DEPTH,connected_components=true){
 	
 	let blueprint = []; //initial blueprint
 	let depth_seeds = [1,2,2,3]; //seeds for depth
-	let hw_seeds = [2,2,2,3,3];
+	let hw_seeds = [2,2,2,3];
 	
 	//Elements of random structure
 	let h = randomFromArr([1]);
@@ -414,7 +416,6 @@ function render(){
 				else{
 					let created = createNewAsset();
 					let colors = created.colors[0];
-					console.log(colors);
 					let colorStr = "rgb("+colors[0]*255+","+colors[1]*255+","+colors[2]*255+")";
 					canvas.style="border-color: "+colorStr+";";
 					document.getElementById("score").style="border-color: "+colorStr+"; color: "+colorStr+";";
