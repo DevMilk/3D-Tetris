@@ -18,7 +18,7 @@ const gravity_speed_init = 0.0005*prompt("Enter difficulity scale",2); //initial
 var gravity_speed = gravity_speed_init; //gravity_speed
 
 //For testing walls
-const DISPLAY_WALLS = false;
+const DISPLAY_WALLS = true;
 const OBJECT_DEPTH = false;
 const SPACE_SPEED = Math.max(0.02,gravity_speed_init*2);
 
@@ -274,8 +274,8 @@ function randomFromArr(arr){
 function createNewAsset(depth_y=OBJECT_DEPTH,connected_components=true){
 	
 	let blueprint = []; //initial blueprint
-	let depth_seeds = [1,2,2,3]; //seeds for depth
-	let hw_seeds = [2,2,2,3];
+	let depth_seeds = [1,1,1,2,2,3]; //seeds for depth
+	let hw_seeds = [2,2,2,2,3];
 	
 	//Elements of random structure
 	let h = randomFromArr([1]);
@@ -426,10 +426,13 @@ function render(){
 		}
 		
 		//Render Object and Continue to loop
-		for(var i=0;i<objects.length;i++){
-			if(DISPLAY_WALLS || walls.includes(i)==false)
-				buffer(objects[i]);
-		}
+		for(var i=0;i<objects.length;i++)
+			if(DISPLAY_WALLS && walls.includes(i))
+				buffer(objects[i],gl.LINES)
+			else
+				buffer(objects[i],objects[i].draw);
+				
+		
 		prevTime = Date.now();
 		
 	}
