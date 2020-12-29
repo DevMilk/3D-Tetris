@@ -430,7 +430,7 @@ function render(){
 			if(DISPLAY_WALLS && walls.includes(i))
 				buffer(objects[i],gl.LINES)
 			else
-				buffer(objects[i],objects[i].draw);
+				buffer(objects[i]);
 				
 		
 		prevTime = Date.now();
