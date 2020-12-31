@@ -34,9 +34,7 @@ function isObjectSelected(event){
 	
 	buffer(mainObj);
 	context.readPixels(mousePos.x, mousePos.y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-	console.log(pixels);
 	if(pixels.reduce((a, b) => a + b, 0) == 0 || pixels[3]!=0){
-		console.log("adas")
 		mainObj.colors = prevColors;
 		prevColors = null;
 	}
@@ -62,7 +60,6 @@ window.onmouseup= function(event){
 	down = false;
 	
 	if(objectSelected && prevColors != null){
-		console.log("daze")
 		let mainObj = objects[objects.length-1];
 		mainObj.colors = prevColors;
 		prevColors = null;
@@ -78,7 +75,6 @@ window.onmousemove = function(event){
 	
 	let x_change = (event.clientX-dragBegin.x)/25;
 	let y_change = (event.clientY-dragBegin.y)/25;
-
 	//If pressed mouse button is wheel, event.buttons == 4
 	if(event.buttons == 4){
 		//Change camera coordinates
@@ -88,14 +84,17 @@ window.onmousemove = function(event){
 	}
 	else{
 		if(objectSelected){
-			if(x_change!=0 && x_change%move_scale == 0){
-				let directionX = Math.abs(x_change)/x_change > 0 ? directions.RIGHT : directions.LEFT;
-				let directionZ = Math.abs(y_change)/y_change > 0 ? directions.FRONT : directions.BEHIND;
-				moveSound.play();
-				move(objects[objects.length-1],move_scale,directionFix(directionX));
-				move(objects[objects.length-1],move_scale,directionFix(directionZ));
+				if(x_change!=0 && Math.abs(x_change/2)>=move_scale){
+					let directionX = Math.abs(x_change)/x_change > 0 ? directions.RIGHT : directions.LEFT;
+					moveSound.play();
+					move(objects[objects.length-1],move_scale,directionFix(directionX));
+				}
+				if(y_change!=0 && Math.abs(y_change/2)>=move_scale ){
+					let directionZ = Math.abs(y_change)/y_change > 0 ? directions.FRONT : directions.BEHIND;
+					moveSound.play();
+					move(objects[objects.length-1],move_scale,directionFix(directionZ));
+				}
 			}
-		}
 		else{
 			//Rotate camera for given 
 			rotateCamera(directions.LEFT,scale=x_change);

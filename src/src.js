@@ -15,7 +15,7 @@ var cameraSpeed = 4; //cameraSpeed
 
 const Y_LIMIT = initialAssetCoord[1]-edge_length; //y coordianate limit for game end condition
 const gravity_speed_init = 0.0005*prompt("Enter difficulity scale",2); //initial gravity_speed
-var gravity_speed = 0; //gravity_speed
+var gravity_speed = gravity_speed_init; //gravity_speed
 
 //For testing walls
 const DISPLAY_WALLS = true;
