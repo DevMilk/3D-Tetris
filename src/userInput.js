@@ -1,13 +1,47 @@
 var down = false;
 var dragBegin;
+var objectSelected = true;
 
 //Get mouse position
-function getMousePos(event) {
+function getMousePos(event,normalize=true) {
     var rect = canvas.getBoundingClientRect();
-    return {
-      x: (event.clientX - rect.left)/rect.width -1/2,
-      y: (event.clientY - rect.top)/rect.height -1/2
-    };
+	if(normalize==false)
+		return {
+		  x: (event.clientX - rect.left-20),
+		  y: (rect.bottom - event.clientY-20)
+		};
+	
+	return {
+		  x: (event.clientX - rect.left)/rect.width -1/2,
+		  y: (event.clientY - rect.top)/rect.height -1/2
+		};
+	
+}
+
+var prevColors= null;
+//Check if object selected by mouse
+function isObjectSelected(event){
+
+	let pixels = new Uint8Array(4); // A single RGBA value
+	let mousePos = getMousePos(event,false);
+	let canv = document.getElementById( "gl-canvas" );
+	var context = canv.getContext('webgl', {preserveDrawingBuffer: true});
+	let mainObj = objects[objects.length-1];
+	prevColors = copy(mainObj.colors);
+
+	for(i=0;i<mainObj.colors.length;i++)
+		mainObj.colors[i]= [255,255,255,0];
+	
+	buffer(mainObj);
+	context.readPixels(mousePos.x, mousePos.y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+	console.log(pixels);
+	if(pixels.reduce((a, b) => a + b, 0) == 0 || pixels[3]!=0){
+		console.log("adas")
+		mainObj.colors = prevColors;
+		prevColors = null;
+	}
+	return pixels[0]!=0 && pixels[3]==0;
+	
 }
 
 //Mouse pressed
@@ -18,15 +52,29 @@ window.onmousedown = function(event){
 	  y: event.clientY
 	};
 	down = true;
-			
+	if(event.button!=4)
+		objectSelected= isObjectSelected(event);
+	
 }
 
 //Mouse released
-window.onmouseup= function(event){down = false;}
+window.onmouseup= function(event){
+	down = false;
+	
+	if(objectSelected && prevColors != null){
+		console.log("daze")
+		let mainObj = objects[objects.length-1];
+		mainObj.colors = prevColors;
+		prevColors = null;
+	}
+	objectSelected=false;
+}
 
 //Mouse moved
 window.onmousemove = function(event){
 	if(!down) return;
+	
+	
 	
 	let x_change = (event.clientX-dragBegin.x)/25;
 	let y_change = (event.clientY-dragBegin.y)/25;
@@ -39,14 +87,25 @@ window.onmousemove = function(event){
 		gl.uniform2fv(cameraCoordLoc, cameraCoord);
 	}
 	else{
-		//Rotate camera for given 
-		rotateCamera(directions.LEFT,scale=x_change);
-		rotateCamera(directions.UP ,scale=y_change);
+		if(objectSelected){
+			if(x_change!=0 && x_change%move_scale == 0){
+				let directionX = Math.abs(x_change)/x_change > 0 ? directions.RIGHT : directions.LEFT;
+				let directionZ = Math.abs(y_change)/y_change > 0 ? directions.FRONT : directions.BEHIND;
+				moveSound.play();
+				move(objects[objects.length-1],move_scale,directionFix(directionX));
+				move(objects[objects.length-1],move_scale,directionFix(directionZ));
+			}
+		}
+		else{
+			//Rotate camera for given 
+			rotateCamera(directions.LEFT,scale=x_change);
+			rotateCamera(directions.UP ,scale=y_change);
+		}
 	}
 	//Update current mouse coordinates
 	dragBegin.x = event.clientX;
 	dragBegin.y = event.clientY;
-	
+	 
 }
 
 //Mouse Wheel rotated

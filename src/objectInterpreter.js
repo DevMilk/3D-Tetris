@@ -111,6 +111,7 @@ function combineCubes(blueprint,a, colorArr,initialX = 0, initialY=0, initialZ=0
 		}		
 		combinedObject.indices.push(...(cubes[i].indices));
 	}
+	
 	return combinedObject;
 	
 }

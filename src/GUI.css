@@ -32,16 +32,12 @@ canvas{
 	padding: 0;
 	margin: auto;
 	display: block;
-	width: 50vw;
-	height: 50vw;
-	max-width: 700px;
-	max-height: 700px;
 	position: absolute;
 	top: 0;
 	bottom: 0;
 	left: 0;
 	right: 0;
-	border: 1vw double black;
+	border: 20px double black;
 	border-radius: 30px;
 	transition: all .5s;
 	

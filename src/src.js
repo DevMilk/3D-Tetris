@@ -15,7 +15,7 @@ var cameraSpeed = 4; //cameraSpeed
 
 const Y_LIMIT = initialAssetCoord[1]-edge_length; //y coordianate limit for game end condition
 const gravity_speed_init = 0.0005*prompt("Enter difficulity scale",2); //initial gravity_speed
-var gravity_speed = gravity_speed_init; //gravity_speed
+var gravity_speed = 0; //gravity_speed
 
 //For testing walls
 const DISPLAY_WALLS = true;
@@ -325,14 +325,16 @@ function buffer(obj,draw=gl.TRIANGLES){
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, gl.createBuffer());
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint8Array(obj.indices), gl.STATIC_DRAW);
 
-	setBuffer(obj.colors);
-
-	setAttrib(vColor,4);
 
 	setBuffer(obj.vertices);
 	
 	setAttrib(vPosition,3);
 
+	
+	setBuffer(obj.colors);
+
+	setAttrib(vColor,4);
+	
 	gl.drawElements(draw, obj.indices.length, gl.UNSIGNED_BYTE, 0);
 	
 }
@@ -352,7 +354,7 @@ window.onload = function init(){
 	gl.enable(gl.DEPTH_TEST);
 	program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
-	
+
 	//Initialize attribute variables
 	vPosition = gl.getAttribLocation( program, "vPosition" );
 	vColor = gl.getAttribLocation( program, "vColor" );
@@ -376,7 +378,7 @@ window.onload = function init(){
 
 
 //MAIN: Render Loop
-function render(){
+function render(once=false){
 	
 	gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	if(document.hasFocus()){
@@ -404,6 +406,12 @@ function render(){
 				for(var i=0;i<objects[objects.length-1].vertices.length;i++)
 					objects[objects.length-1].vertices[i][1]+=distance;
 				
+				if(prevColors!=null){
+					objects[objects.length-1].colors = prevColors;
+					prevColors=null;
+				}
+				objectSelected = false;
+					
 				let newCubesToAdd = disassemble(objects.pop());
 				for(var i=0;i<newCubesToAdd.length;i++)
 					addToScene(newCubesToAdd[i]);
@@ -441,7 +449,8 @@ function render(){
 		TimeStopTicket = true;
 	}
 	
-
+	if(once==true)
+		return
 	requestAnimFrame( render );
 	
 }
