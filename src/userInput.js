@@ -34,7 +34,7 @@ function isObjectSelected(event){
 	
 	buffer(mainObj);
 	context.readPixels(mousePos.x, mousePos.y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-	console.log(pixels);
+	console.log(pixels)
 	if(pixels.reduce((a, b) => a + b, 0) == 0 || pixels[3]!=0){
 		mainObj.colors = prevColors;
 		prevColors = null;
@@ -85,12 +85,12 @@ window.onmousemove = function(event){
 	}
 	else{
 		if(objectSelected){
-				if(x_change!=0 && Math.abs(x_change/2)>=move_scale){
+				if(x_change!=0 && Math.abs(x_change/5)>=move_scale){
 					let directionX = Math.abs(x_change)/x_change > 0 ? directions.RIGHT : directions.LEFT;
 					moveSound.play();
 					move(objects[objects.length-1],move_scale,directionFix(directionX));
 				}
-				if(y_change!=0 && Math.abs(y_change/2)>=move_scale ){
+				if(y_change!=0 && Math.abs(y_change/5)>=move_scale ){
 					let directionZ = Math.abs(y_change)/y_change > 0 ? directions.FRONT : directions.BEHIND;
 					moveSound.play();
 					move(objects[objects.length-1],move_scale,directionFix(directionZ));

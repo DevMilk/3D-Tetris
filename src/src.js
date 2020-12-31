@@ -296,7 +296,7 @@ function createNewAsset(depth_y=OBJECT_DEPTH,connected_components=true){
 	//Random Colors
 	let colors = [] 
 	for(let i=0;i<4;i++)
-		colors.push([Math.random(),Math.random(),Math.random(),1.0]);
+		colors.push([Math.random(),Math.random(),Math.random(),1]);
 	let obj = combineCubes(blueprint,edge_length,colors,...initialAssetCoord);		
 						
 	addToScene(obj);
@@ -352,9 +352,12 @@ window.onload = function init(){
     gl.viewport( 0, 0, canvas.width, canvas.height );
     gl.clearColor( 0.1,	0.04,	0.17,   1.0 );
 	gl.enable(gl.DEPTH_TEST);
-	gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-	gl.enable(gl.BLEND);
-	gl.disable(gl.DEPTH_TEST);
+	//gl.ONE, gl.ONE_MINUS_SRC_ALPHA
+	if(DISPLAY_WALLS==true){
+		gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+		gl.enable(gl.BLEND);
+		gl.disable(gl.DEPTH_TEST);
+	}
 	program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
 
@@ -438,9 +441,11 @@ function render(once=false){
 		}
 		
 		//Render Object and Continue to loop
-		for(var i=0;i<objects.length;i++)
+		for(var i=0;i<objects.length;i++){
+			if(DISPLAY_WALLS==false && walls.includes(i))
+				continue
 			buffer(objects[i]);
-				
+		}
 		
 		prevTime = Date.now();
 		

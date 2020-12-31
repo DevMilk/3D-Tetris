@@ -26,19 +26,20 @@ var initialAssetCoord = [-0.2,hill,0.2]
 var wallLength = 1.3;
 var wallPivot = 0.8;
 var wallThickness = 0.051;
-var wallColor = [0.3, 0.3, 0.8, 0.01]
-var groundColor = [0.3, 0.3, 0.8, 1]
+var wallColor = [0.3, 0.3, 0.8, 0.3]
+var groundCOlor = [0.3, 0.3, 0.8, 0.8]
+
 //First objects
 var initObjects = [
 	/*DÜZEY*/ createRect(-0.4,ground,0,
 				w,1.5*h,d,
-				[wallColor]),
+				[groundCOlor]),
 				
-				createRect(-0.5,wallPivot,0,
+				createRect(-0.451,wallPivot,0,
 				wallThickness,wallLength,d,
 				[wallColor]),
 				
-				createRect(-0.4,wallPivot,0-edge_length,
+				createRect(-0.4,wallPivot,0-edge_length/2-0.01,
 				w,wallLength,wallThickness,
 				[wallColor]),
 				
@@ -50,9 +51,9 @@ var initObjects = [
 				wallThickness,wallLength,d,
 				[wallColor]),
 				
-				createRect(-0.4,hill+edge_length,0,
+				createRect(-0.4,hill+2*edge_length,0,
 				w,1.5*h,d,
-				[wallColor])
+				[wallColor]),
 				
 
 ]
