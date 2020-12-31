@@ -20,12 +20,14 @@ var w = edge_length*w_count;
 var h = 0.05;
 var d = edge_length*h_count;
 var ground = -0.5;
+var hill = 0.7;
 var l = 0.01;
-var initialAssetCoord = [-0.2,0.7,0.2]
+var initialAssetCoord = [-0.2,hill,0.2]
 var wallLength = 1.3;
 var wallPivot = 0.8;
 var wallThickness = 0.051;
-var wallColor = [0.3, 0.3, 0.8, 1.0]
+var wallColor = [0.3, 0.3, 0.8, 0.01]
+var groundColor = [0.3, 0.3, 0.8, 1]
 //First objects
 var initObjects = [
 	/*DÜZEY*/ createRect(-0.4,ground,0,
@@ -47,11 +49,16 @@ var initObjects = [
 				createRect(-0.4+w,wallPivot,0,
 				wallThickness,wallLength,d,
 				[wallColor]),
+				
+				createRect(-0.4,hill+edge_length,0,
+				w,1.5*h,d,
+				[wallColor])
+				
 
 ]
 
 //Make invisible objects such as walls
-walls = [1,2,3,4];
+walls = [1,2,3,4,5];
 
 //Get 4 indices and generate 6 indices for cube
 function quad(indicesOriginal){

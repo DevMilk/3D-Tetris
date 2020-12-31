@@ -34,6 +34,7 @@ function isObjectSelected(event){
 	
 	buffer(mainObj);
 	context.readPixels(mousePos.x, mousePos.y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+	console.log(pixels);
 	if(pixels.reduce((a, b) => a + b, 0) == 0 || pixels[3]!=0){
 		mainObj.colors = prevColors;
 		prevColors = null;
