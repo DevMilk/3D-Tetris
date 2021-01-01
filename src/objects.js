@@ -51,9 +51,9 @@ var initObjects = [
 				wallThickness,wallLength,d,
 				[wallColor]),
 				
-				createRect(-0.4,hill+2*edge_length,0,
-				w,1.5*h,d,
-				[wallColor]),
+				createRect(-0.4,hill+0.0051,0,
+				w,0.1*h,d,
+				[[1,1,1,1]]),
 				
 
 ]

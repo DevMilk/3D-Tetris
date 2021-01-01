@@ -23,12 +23,6 @@ attribute  vec4 vColor;
 varying vec4 fColor;
 uniform vec4 camera;
 uniform vec2 cameraCoord;
-
-float getDistance(vec3 pos, vec3 pos2){
-
-	return abs(pos.x-pos2.x)+abs(pos.y-pos2.y)+abs(pos.z-pos2.z);
-
-}
 void main()
 {
     // Compute the sines and cosines of theta for each of
@@ -63,11 +57,9 @@ void main()
 	 //vColor*(vPosition.x*vPosition.y+vPosition.z+1.0);;
 	//(cos(vColor*(vPosition.x*vPositWion.y+vPosition.z+0.5)));
 	//vColor*(min(mod(vPosition.y,freq)*3.0+0.7,1.0));
-	vec4 cameraNormalized = vec4(c_c.x-cameraCoord.x,c_c.y+cameraCoord.y,c_c.z,1.0);
-	float distance = getDistance(vPosition.xyz,cameraNormalized.xyz);
 	
 	float freq = 0.1;
-	if(vColor.a>0.1){
+	if(vColor.a>0.3){
 		fColor = (vColor*(vPosition.x*vPosition.y+vPosition.z+0.5));
 		fColor = fColor/(0.65 + 15.0*pow((mod(abs(vPosition.y),freq)),1.3));
 	}

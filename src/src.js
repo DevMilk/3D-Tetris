@@ -18,7 +18,10 @@ const gravity_speed_init = 0.0005*prompt("Enter difficulity scale",2); //initial
 var gravity_speed = gravity_speed_init; //gravity_speed
 
 //For testing walls
-const DISPLAY_WALLS = true;
+const DISPLAY_WALLS = false;
+/*Not: Eğer alpha değerleri dahil edilirse, depth olmayacağından dolayı,
+objelerin derinliği render edilme sırasına göre değişiyor o yüzden bir takım sıkıntılar çıkıyor.
+*/
 const OBJECT_DEPTH = false;
 const SPACE_SPEED = Math.max(0.02,gravity_speed_init*2);
 
@@ -296,7 +299,7 @@ function createNewAsset(depth_y=OBJECT_DEPTH,connected_components=true){
 	//Random Colors
 	let colors = [] 
 	for(let i=0;i<4;i++)
-		colors.push([Math.random(),Math.random(),Math.random(),1]);
+		colors.push([Math.random(),Math.random(),Math.random(),1.0]);
 	let obj = combineCubes(blueprint,edge_length,colors,...initialAssetCoord);		
 						
 	addToScene(obj);
@@ -351,10 +354,11 @@ window.onload = function init(){
     if ( !gl ) { alert( "WebGL isn't available" ); }
     gl.viewport( 0, 0, canvas.width, canvas.height );
     gl.clearColor( 0.1,	0.04,	0.17,   1.0 );
-	gl.enable(gl.DEPTH_TEST);
 	//gl.ONE, gl.ONE_MINUS_SRC_ALPHA
+	gl.enable(gl.DEPTH_TEST)
 	if(DISPLAY_WALLS==true){
 		gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+
 		gl.enable(gl.BLEND);
 		gl.disable(gl.DEPTH_TEST);
 	}
@@ -388,12 +392,13 @@ function render(once=false){
 	
 	gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	if(document.hasFocus()){
-		document.getElementsByTagName("body")[0].style="";
+		
 		var deltaTime = (Date.now() - prevTime)/10; //divide by 10 for normalization
 		
 		if(TimeStopTicket){
 			deltaTime ^= deltaTime;
 			TimeStopTicket = false;
+			document.getElementsByTagName("body")[0].style="";
 		}
 		if(ended==false){
 			let [CollidedObjectIndex,distance] = boxClsn(objects[objects.length-1]);
@@ -442,9 +447,12 @@ function render(once=false){
 		
 		//Render Object and Continue to loop
 		for(var i=0;i<objects.length;i++){
-			if(DISPLAY_WALLS==false && walls.includes(i))
+			if(DISPLAY_WALLS==false && walls.includes(i) && i!=5)
 				continue
-			buffer(objects[i]);
+			if(i==5)
+				buffer(objects[i],gl.LINES)
+			else
+				buffer(objects[i]);
 		}
 		
 		prevTime = Date.now();
