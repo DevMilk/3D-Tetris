@@ -49,17 +49,13 @@ var initObjects = [
 				
 				createRect(-0.4+w,wallPivot,0,
 				wallThickness,wallLength,d,
-				[wallColor]),
-				
-				createRect(-0.4,hill+0.0051,0,
-				w,0.1*h,d,
-				[[1,1,1,1]]),
+				[wallColor])
 				
 
 ]
 
 //Make invisible objects such as walls
-walls = [1,2,3,4,5];
+walls = [1,2,3,4];
 
 //Get 4 indices and generate 6 indices for cube
 function quad(indicesOriginal){

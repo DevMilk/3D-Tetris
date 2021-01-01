@@ -21,7 +21,12 @@ html{
    -ms-user-select: none;
    user-select: none;
 }
-
+#options{
+	position:fixed;
+	border: 1px solid white;
+	border-radius: 10px;
+	padding: 2px;
+}
 body{
 	height: -webkit-fill-available;
 	max-height: 90vh;

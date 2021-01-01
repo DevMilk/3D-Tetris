@@ -1,14 +1,16 @@
 var down = false;
 var dragBegin;
 var objectSelected = true;
-
+var leftBorderWidth;
+var topBorderWidth;
 //Get mouse position
 function getMousePos(event,normalize=true) {
-    var rect = canvas.getBoundingClientRect();
+    let rect = canvas.getBoundingClientRect();
+
 	if(normalize==false)
 		return {
-		  x: (event.clientX - rect.left-20),
-		  y: (rect.bottom - event.clientY-20)
+		  x: (event.clientX - rect.left-leftBorderWidth),
+		  y: (rect.bottom - event.clientY-topBorderWidth)
 		};
 	
 	return {
@@ -42,6 +44,20 @@ function isObjectSelected(event){
 	
 }
 
+function EnableAlpha(element){
+	if(element.checked){
+		gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+		gl.enable(gl.BLEND);
+		gl.disable(gl.DEPTH_TEST);
+		DISPLAY_WALLS= true;
+	}
+	else{
+		gl.disable(gl.BLEND);
+		gl.enable(gl.DEPTH_TEST);
+		DISPLAY_WALLS= false;
+	}
+	
+}
 //Mouse pressed
 window.onmousedown = function(event){
 	//Save current mouse position

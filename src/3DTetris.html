@@ -91,13 +91,16 @@ main()
 <script type="text/javascript" src="userInput.js"></script>
 <body>
 
-<div id="score">Score: 0</div>
-<canvas id="gl-canvas" width="680"" height="680">
-Oops ... your browser doesn't support the HTML5 canvas element
-</canvas>
+	<div id="options">
+		<input type="checkbox" id="alpha" name="alpha" onclick='EnableAlpha(this);'>
+		<label for="alpha">Enable Alpha</label><br>
+	</div>
 
-<br/>
-
+	<div id="score">Score: 0</div>
+	
+	<canvas id="gl-canvas" width="680" height="680">
+	Oops ... your browser doesn't support the HTML5 canvas element
+	</canvas>
 
 </body>
 <footer><a href = "https://github.com/DevMilk"><i class="fa fa-github"></i></a></footer>
