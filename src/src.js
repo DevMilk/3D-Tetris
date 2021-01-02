@@ -425,11 +425,11 @@ function render(once=false){
 		var deltaTime = (Date.now() - prevTime)/10; //divide by 10 for normalization
 		
 		if(TimeStopTicket){
-			deltaTime ^= deltaTime;
+			deltaTime = 0;
 			TimeStopTicket = false;
 			document.getElementsByTagName("body")[0].style="";
 		}
-		
+		deltaTime = Math.min(2,deltaTime);
 		if(ended==false){
 			let [CollidedObjectIndex,distance] = boxClsn(objects[objects.length-1]);
 			CollidedObjectIndex -=1;
@@ -475,7 +475,6 @@ function render(once=false){
 		//Render Object and Continue to loop
 		renderAllObjects()
 		
-		prevTime = Date.now();
 		
 	}
 	else{
@@ -483,6 +482,7 @@ function render(once=false){
 		TimeStopTicket = true;
 	}
 	
+	prevTime = Date.now();
 	if(once==true)
 		return
 	requestAnimFrame( render );
