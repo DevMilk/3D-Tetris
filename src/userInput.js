@@ -22,21 +22,24 @@ function getMousePos(event,normalize=true) {
 
 var prevColors= null;
 //Check if object selected by mouse
-function isObjectSelected(event){
+function isObjectSelected(event,checkWhenMouseMove=false){
 
 	let pixels = new Uint8Array(4); // A single RGBA value
 	let mousePos = getMousePos(event,false);
-	let canv = document.getElementById( "gl-canvas" );
-	var context = canv.getContext('webgl', {preserveDrawingBuffer: true});
 	let mainObj = objects[objects.length-1];
-	prevColors = copy(mainObj.colors);
-
-	for(i=0;i<mainObj.colors.length;i++)
-		mainObj.colors[i]= [255,255,255,0];
 	
+	//If this function not executed on mouse move event, alpha of color is 0 already.
+	if(!checkWhenMouseMove){
+		prevColors = copy(mainObj.colors);
+
+		for(i=0;i<mainObj.colors.length;i++)
+			mainObj.colors[i]= [255,255,255,0];
+		
+	}
 	buffer(mainObj);
-	context.readPixels(mousePos.x, mousePos.y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-	if(pixels.reduce((a, b) => a + b, 0) == 0 || pixels[3]!=0){
+	gl.readPixels(mousePos.x, mousePos.y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+	
+	if(!checkWhenMouseMove && pixels.reduce((a, b) => a + b, 0) == 0 || pixels[3]!=0){
 		mainObj.colors = prevColors;
 		prevColors = null;
 	}
@@ -44,6 +47,7 @@ function isObjectSelected(event){
 	
 }
 
+//Enable or disable Alpha blend option
 function EnableAlpha(element){
 	if(element.checked){
 		gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
@@ -58,6 +62,12 @@ function EnableAlpha(element){
 	}
 	
 }
+
+//Enable generating object that can grow along y-axis
+function objectDepth(element){
+	OBJECT_DEPTH = element.checked;
+}
+
 //Mouse pressed
 window.onmousedown = function(event){
 	//Save current mouse position
@@ -74,7 +84,6 @@ window.onmousedown = function(event){
 //Mouse released
 window.onmouseup= function(event){
 	down = false;
-	
 	if(objectSelected && prevColors != null){
 		let mainObj = objects[objects.length-1];
 		mainObj.colors = prevColors;
@@ -100,15 +109,34 @@ window.onmousemove = function(event){
 	}
 	else{
 		if(objectSelected){
-				if(x_change!=0 && Math.abs(x_change/5)>=move_scale){
-					let directionX = Math.abs(x_change)/x_change > 0 ? directions.RIGHT : directions.LEFT;
-					moveSound.play();
-					move(objects[objects.length-1],move_scale,directionFix(directionX));
-				}
-				if(y_change!=0 && Math.abs(y_change/5)>=move_scale ){
-					let directionZ = Math.abs(y_change)/y_change > 0 ? directions.FRONT : directions.BEHIND;
-					moveSound.play();
-					move(objects[objects.length-1],move_scale,directionFix(directionZ));
+			
+				let x_change_new = Math.abs(x_change);
+				let y_change_new = Math.abs(y_change);
+				let isXChangeEnough = x_change_new>=move_scale;
+				let isYChangeEnough = y_change_new>=move_scale;
+				
+				//If mouse X or Y difference is big enough to move
+				if(isXChangeEnough || isYChangeEnough){
+					
+					//Check if mouse on object
+					let isSelectedNow = isObjectSelected(event,true);
+					
+					//If mouse is not an object then move it
+					if(!isSelectedNow){
+						
+						if(isXChangeEnough){
+							let directionX = Math.abs(x_change)/x_change > 0 ? directions.RIGHT : directions.LEFT;
+							moveSound.play();
+							move(objects[objects.length-1],move_scale,directionFix(directionX));
+						}
+						if(isYChangeEnough){
+							let directionZ = Math.abs(y_change)/y_change > 0 ? directions.FRONT : directions.BEHIND;
+							moveSound.play();
+							move(objects[objects.length-1],move_scale,directionFix(directionZ));
+						}
+						
+					}
+
 				}
 			}
 		else{
