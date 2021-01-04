@@ -118,11 +118,8 @@ window.onmousemove = function(event){
 				//If mouse X or Y difference is big enough to move
 				if(isXChangeEnough || isYChangeEnough){
 					
-					//Check if mouse on object
-					let isSelectedNow = isObjectSelected(event,true);
-					
 					//If mouse is not an object then move it
-					if(!isSelectedNow){
+					if(!isObjectSelected(event,true)){
 						
 						if(isXChangeEnough){
 							let directionX = Math.abs(x_change)/x_change > 0 ? directions.RIGHT : directions.LEFT;
