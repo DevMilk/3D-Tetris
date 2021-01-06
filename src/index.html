@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html  >
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<link rel="stylesheet" href="GUI.css">
+
+<link href="https://fonts.googleapis.com/css?family=Montserrat:900|Work+Sans:300" rel="stylesheet">
+<source src="soundeffects/move.mp3" type="audio/mp3">
+<source src="soundeffects/stack.mp3" type="audio/mp3">
+<source src="soundeffects/stackComplete.mp3" type="audio/mp3">
+<source src="soundeffects/rotate.mp3" type="audio/mp3">
+<source src="soundeffects/fall.wav" type="audio/wav">
+
+<title>3D Tetris</title>
+</head>
+
+<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute  vec4 vPosition;
+attribute  vec4 vColor;
+varying vec4 fColor;
+uniform vec4 camera;
+uniform vec2 cameraCoord;
+void main()
+{
+
+	float zoom = camera.w; //Kamera'nın 4. elementi scale/zoom
+	vec3 cameraTheta = camera.xyz; //Kamera'nın açı dereceleri
+	vec3 camera_angles = radians( cameraTheta );
+    vec3 c_c = cos( camera_angles );
+    vec3 c_s = sin( camera_angles );
+					
+					
+	//Kamera için yaptım
+	mat4 cx = mat4( zoom,  0.0,  0.0, 0.0,
+					0.0,  c_c.x,  c_s.x, 0.0,
+					0.0, -c_s.x,  c_c.x, 0.0,
+					0.0,  0.0,  0.0, zoom );
+
+    mat4 cy = mat4( c_c.y, 0.0, -c_s.y, 0.0,
+					0.0, zoom,  0.0, 0.0,
+					c_s.y, 0.0,  c_c.y, 0.0,
+					0.0, 0.0,  0.0, zoom );
+
+
+    mat4 cz = mat4( c_c.z, c_s.z, 0.0, 0.0,
+				   -c_s.z,  c_c.z, 0.0, 0.0,
+					0.0,  0.0, zoom, 0.0,
+					0.0,  0.0, 0.0, zoom);
+	
+	float freq = 0.1; //Yanıp sönme frekansı
+	
+	//Alpha değeri'ne göre farklı shaderlar 
+	if(vColor.a>0.3){
+		fColor = (vColor*(vPosition.x*vPosition.y+vPosition.z+0.5));
+		fColor = fColor/(0.65 + 15.0*pow((mod(abs(vPosition.y),freq)),1.3));
+	}
+	else{
+		fColor = vColor;
+	}
+	
+    gl_Position = vPosition * cy * cx * cz;
+	
+	//Kamera koordinatlarına göre shift işlemleri
+	gl_Position.x +=cameraCoord.x; 
+	gl_Position.y +=cameraCoord.y;
+    gl_Position.z = -gl_Position.z; // Dönme yönünü ters çevirir
+}
+</script>
+<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+varying vec4 fColor;
+void
+main()
+{
+    gl_FragColor = fColor;
+}
+</script>
+<script type="text/javascript" src="objectInterpreter.js"></script>
+<script type="text/javascript" src="objects.js"></script>
+<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+<script type="text/javascript" src="../Common/initShaders.js"></script>
+<script type="text/javascript" src="../Common/MV.js"></script>
+<script type="text/javascript" src="src.js"></script>
+<script type="text/javascript" src="userInput.js"></script>
+<body>
+
+	<div id="options">
+		<input type="checkbox" id="alpha" name="alpha" onclick='EnableAlpha(this);'>
+		<label for="alpha">Enable Alpha</label><br>
+		<input type="checkbox" id="objectDepth" name="objectDepth" onclick='objectDepth(this);'>
+		<label for="objectDepth">Enable Object Depth</label><br>
+	</div>
+
+	<div id="score">Score: 0</div>
+	
+	<canvas id="gl-canvas" width="680" height="680">
+	Oops ... your browser doesn't support the HTML5 canvas element
+	</canvas>
+
+</body>
+<footer><a href = "https://github.com/DevMilk"><i class="fa fa-github"></i></a></footer>
+</html>
