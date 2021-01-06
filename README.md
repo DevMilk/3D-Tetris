@@ -2,8 +2,13 @@
   <h1 align="center">3D TETRIS FROM SCRATCH USING WEBGL</h1>
 </p>
 
+<h2 align="center">Image Screenshots</h2>
+
 ![](screenshots/gameAlpha.jpg)
-![](screenshots/camera.gif)
+<p align="center">
+  <img src="https://github.com/DevMilk/3D-Tetris/blob/main/screenshots/camera.gif">
+</p>
+
 <h2 align="center">Gameplay</h2>
 
     WASD or Mouse Drag on object: Movement
