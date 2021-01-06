@@ -1,7 +1,8 @@
 <p align="center">
-  <h1 align="center">3D TETRIS FROM SCRATCH USING WEBGL</h3>
+  <h1 align="center">3D TETRIS FROM SCRATCH USING WEBGL</h1>
 </p>
----
+
+
 <h2 align="center">Gameplay</h2>
 
     WASD or Mouse Drag on object: Movement
