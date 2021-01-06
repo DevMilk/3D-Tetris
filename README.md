@@ -11,7 +11,7 @@
     E: Rotate 90 degrees around the x-axis
     Mouse Wheel Scroll: Zoom in/out to the point of cursor 
     Mouse Wheel Button Drag: Move camera position
-    Mouse Drag: Rotate camera perspective
+    Arrows or Mouse Drag: Rotate camera perspective
 ---
 <h2 align="center">Options</h2>
 
