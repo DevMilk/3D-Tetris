@@ -244,6 +244,7 @@ window.onkeyup = function(){
 	}
 }
 
+//Mapping mobile bindings(touch events) to mouse bindings
 function touchHandler(event)
 {
     var touches = event.changedTouches,
