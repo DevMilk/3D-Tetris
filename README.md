@@ -1,8 +1,9 @@
 <p align="center">
   <h1 align="center">3D TETRIS FROM SCRATCH USING WEBGL</h1>
+  <a href="devmilk.github.io/3d-tetris/">devmilk.github.io/3d-tetris/</a>
 </p>
 
-<h2 align="center">Image Screenshots</h2>
+<h2 align="center">Screenshots</h2>
 
 ![](screenshots/gameAlpha.jpg)
 <p align="center">
