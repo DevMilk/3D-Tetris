@@ -72,7 +72,6 @@ class Object{
 //Assign sound files
 function initSounds(){
 	let soundFolder = "src/soundeffects/";
-	console.log("a");
 	moveSound = new Audio(soundFolder+'move.mp3');
 	stackSound = new Audio(soundFolder+"stack.mp3");
 	stackCompleteSound = new Audio(soundFolder+"stackComplete.mp3");
@@ -359,7 +358,7 @@ window.onload = function init(){
     gl = WebGLUtils.setupWebGL( canvas );
     if ( !gl ) { alert( "WebGL isn't available" ); }
     gl.viewport( 0, 0, canvas.width, canvas.height );
-    gl.clearColor( 0.1,	0.04,	0.17,   1.0 );
+    gl.clearColor( 0.1,	0.04,	0.22,   1.0 );
 	gl.enable(gl.DEPTH_TEST)
 	if(DISPLAY_WALLS==true){
 		gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
@@ -446,6 +445,7 @@ function render(once=false){
 				
 				//Dissassemble the fallen object
 				let newCubesToAdd = disassemble(objects.pop());
+				console.log(newCubesToAdd);
 				for(var i=0;i<newCubesToAdd.length;i++)
 					addToScene(newCubesToAdd[i]);
 				changeScore(newCubesToAdd.length*10);

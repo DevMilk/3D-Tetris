@@ -27,7 +27,7 @@ var wallLength = 1.3;
 var wallPivot = 0.8;
 var wallThickness = 0.051;
 var wallColor = [0.3, 0.3, 0.8, 0.3]
-var groundCOlor = [0.3, 0.3, 0.8, 0.8]
+var groundCOlor = [0.7, 0.7, 0.7, 1.0]
 
 //First objects
 var initObjects = [
