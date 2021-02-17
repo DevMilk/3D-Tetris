@@ -2,7 +2,12 @@
   <h1 align="center">3D TETRIS FROM SCRATCH USING WEBGL</h1>
 </p>
 
-<h2 align="center">Image Screenshots</h2>
+---
+
+<a href="https://devmilk.github.io/3D-Tetris/">Click To Play Game</a>
+
+---
+<h2 align="center">Screenshots</h2>
 
 ![](screenshots/gameAlpha.jpg)
 <p align="center">
