@@ -4,7 +4,7 @@
 
 ---
 
-<a href="https://devmilk.github.io/3D-Tetris/">Click To Play Game</a>
+<a href="https://devmilk.github.io/3D-Tetris/">Click To Play Game (Google Chrome Recommended) </a>
 
 ---
 <h2 align="center">Screenshots</h2>
