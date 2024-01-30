@@ -173,6 +173,7 @@ window.addEventListener('wheel', ({ deltaY }) => {
 
 //Key pressed
 window.onkeydown = function(event) {
+	if(ended) return;
 	let key = String.fromCharCode(event.keyCode).toLowerCase();
 	
 	switch(key){

@@ -14,8 +14,8 @@ function getInput(text,default_val=4,min_val=1){
   
 }
 var edge_length = 0.1; //edge length of cubes
-var w_count = getInput("enter width of board",5,4);
-var h_count = getInput("enter height of board",4,4);
+var w_count = getInput("enter width of board",6,4);
+var h_count = getInput("enter height of board",6,4);
 var w = edge_length*w_count;
 var h = 0.05;
 var d = edge_length*h_count;

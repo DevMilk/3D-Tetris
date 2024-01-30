@@ -55,7 +55,7 @@ void main()
 	//Alpha değeri'ne göre farklı shaderlar 
 	if(vColor.a>0.3){
 		fColor = (vColor*(vPosition.x*vPosition.y+vPosition.z+0.5));
-		fColor = fColor/(0.65 + 15.0*pow((mod(abs(vPosition.y),freq)),1.3));
+		//fColor = fColor/(0.65 + 15.0*pow((mod(abs(vPosition.y),freq)),1.3));
 	}
 	else{
 		fColor = vColor;
@@ -96,7 +96,7 @@ main()
 	</div>
 
 	<div id="score">Score: 0</div>
-	
+	<br><br>
 	<canvas id="gl-canvas" width="680" height="680">
 	Oops ... your browser doesn't support the HTML5 canvas element
 	</canvas>
