@@ -71,7 +71,7 @@ class Object{
 
 //Assign sound files
 function initSounds(){
-	let soundFolder = "soundeffects/";
+	let soundFolder = "src/soundeffects/";
 	moveSound = new Audio(soundFolder+'move.mp3');
 	stackSound = new Audio(soundFolder+"stack.mp3");
 	stackCompleteSound = new Audio(soundFolder+"stackComplete.mp3");
